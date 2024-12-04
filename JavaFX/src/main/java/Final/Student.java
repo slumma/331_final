@@ -56,7 +56,7 @@ public class Student extends Person {
     }
     
     // setter
-    private void setGPA(double g){
+    public void setGPA(double g){
         Scanner scanner = new Scanner(System.in);
         boolean isValid;
 
@@ -159,8 +159,7 @@ public class Student extends Person {
     public void setEContactZIP(String eContactZIP) {
         this.eContactZIP = eContactZIP;
     }
-    
-    
+
     // report of student 
     @Override
     public String toString() {

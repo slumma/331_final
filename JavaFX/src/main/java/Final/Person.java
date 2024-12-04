@@ -21,60 +21,74 @@ public class Person {
     }
     
     public Person(String f, String l, String e, String ssn){
-        this.setName("First Name", f);
-        this.setName("Last Name", l);
+        this.setFirstName(f);
+        this.setLastName(l);
         this.setEmail(e);
         this.SSN = ssn; // should have some way of verifying the SSN, but its out of scope for project
         
         this.universityID = nextID++;  // Assign unique ID and increment it
     }
     
-    // fieldName = first OR last, name = user entered name
-    private void setName(String fieldName, String name){
-        Scanner in = new Scanner(System.in); 
+    // setter for first name
+    public void setFirstName(String firstName) {
+        Scanner in = new Scanner(System.in);
         boolean hasDigit;
 
         do {
             hasDigit = false;
 
             // checks if the input contains any digits
-            for (int i = 0; i < name.length(); i++) {
-                if (Character.isDigit(name.charAt(i))) {
+            for (int i = 0; i < firstName.length(); i++) {
+                if (Character.isDigit(firstName.charAt(i))) {
                     hasDigit = true;
                     break;
                 }
             }
 
             if (hasDigit) {
-                System.out.println("Error: " + fieldName + " cannot contain numbers. Please enter a valid name:");
-                name = in.nextLine(); // reprompt user 
+                System.out.println("Error: First Name cannot contain numbers. Please enter a valid name:");
+                firstName = in.nextLine(); // reprompt user 
             }
         } while (hasDigit);
 
-        // assign the valid name to the appropriate field
-        if (fieldName.equals("First Name")) {
-            this.firstName = name;
-        } else if (fieldName.equals("Last Name")) {
-            this.lastName = name;
-        }
+        // assign the valid first name
+        this.firstName = firstName;
+    }
+
+    // setter for last name
+    public void setLastName(String lastName) {
+        Scanner in = new Scanner(System.in);
+        boolean hasDigit;
+
+        do {
+            hasDigit = false;
+
+            // checks if the input contains any digits
+            for (int i = 0; i < lastName.length(); i++) {
+                if (Character.isDigit(lastName.charAt(i))) {
+                    hasDigit = true;
+                    break;
+                }
+            }
+
+            if (hasDigit) {
+                System.out.println("Error: Last Name cannot contain numbers. Please enter a valid name:");
+                lastName = in.nextLine(); // reprompt user 
+            }
+        } while (hasDigit);
+
+        // assign the valid last name
+        this.lastName = lastName;
     }
     
-    private void setEmail(String email) {
-        Scanner in = new Scanner(System.in);
-        boolean isValid;
-
+    public void setEmail(String email) {
         // checks if the email the user provided has an '@' and '.' ==> both parts must be in it to be valid 
-        do {
-            isValid = email.contains("@") && email.contains(".");
-
-            if (!isValid) {
-                System.out.println("Error: Email must contain '@' and '.' symbols. Please enter a valid email:");
-                email = in.nextLine(); // reprompt the user 
-            }
-        } while (!isValid);
-
-        // set email
-        this.emailAddress = email;
+        boolean isValid = email.contains("@") && email.contains(".");
+        if (isValid) {
+            this.emailAddress = email;
+        } else {
+            System.out.println("Error: Email must contain '@' and '.' symbols. Please enter a valid email:");
+        }
     }
 
     // Getter methods for first and last name
@@ -89,5 +103,9 @@ public class Person {
     public int getUniversityID(){
         return universityID;
     }
-}
 
+    public String getEmail(){
+        return emailAddress;
+    }
+
+}
