@@ -1,5 +1,5 @@
 package Final;
-import java.util.*;
+import java.util.Scanner;
 
 public class Person {
 
@@ -31,7 +31,7 @@ public class Person {
     
     // fieldName = first OR last, name = user entered name
     private void setName(String fieldName, String name){
-        Scanner scanner = new Scanner(System.in); 
+        Scanner in = new Scanner(System.in); 
         boolean hasDigit;
 
         do {
@@ -47,7 +47,7 @@ public class Person {
 
             if (hasDigit) {
                 System.out.println("Error: " + fieldName + " cannot contain numbers. Please enter a valid name:");
-                name = scanner.nextLine(); // reprompt user 
+                name = in.nextLine(); // reprompt user 
             }
         } while (hasDigit);
 
@@ -60,7 +60,7 @@ public class Person {
     }
     
     private void setEmail(String email) {
-        Scanner scanner = new Scanner(System.in);
+        Scanner in = new Scanner(System.in);
         boolean isValid;
 
         // checks if the email the user provided has an '@' and '.' ==> both parts must be in it to be valid 
@@ -69,7 +69,7 @@ public class Person {
 
             if (!isValid) {
                 System.out.println("Error: Email must contain '@' and '.' symbols. Please enter a valid email:");
-                email = scanner.nextLine(); // reprompt the user 
+                email = in.nextLine(); // reprompt the user 
             }
         } while (!isValid);
 

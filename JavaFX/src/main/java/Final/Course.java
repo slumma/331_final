@@ -46,6 +46,7 @@ public class Course {
     }
 
     // course report 
+    @Override
     public String toString() {
         String courseDetails = "";
 

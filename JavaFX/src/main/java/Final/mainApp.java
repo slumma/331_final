@@ -1,10 +1,12 @@
 package Final;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
-import oracle.jdbc.pool.*;
-import oracle.jdbc.*;
-import java.util.*;
+
+import oracle.jdbc.pool.OracleDataSource;
 
 public class mainApp {
 
@@ -18,59 +20,68 @@ public class mainApp {
 
 
 
-        /*int menuChoice = 0;
+        int menuChoice = 0;
         
-        while (menuChoice != 5)
+        while (menuChoice != 6)
         {
-            System.out.println("1 - Create new Inventory Item");
-            System.out.println("2 - Update Existing Inventory Item");
-            System.out.println("3 - Delete Existing Inventory Item");
-            System.out.println("4 - Print Inventory");
-            System.out.println("5 - Exit Application");
+            System.out.println("======SCC Management Software======");
+            System.out.println("1 - Student Management");
+            System.out.println("2 - Course Management");
+            System.out.println("3 - Faculty Management");
+            System.out.println("4 - Enrollment");
+            System.out.println("5 - Reports");
+            System.out.println("6 - Exit Application");
             System.out.println("===================================");
-            System.out.println("Selection?: ");
+            System.out.println("Enter Selection: ");
             menuChoice = in.nextInt();
             
             in.nextLine(); // Consume errant new line character
             
             switch (menuChoice)
             {
-                case 1: newItem();
+                case 1: 
+                    studentManagement();
                     break;
-                case 2: 
+                case 2:
+                    courseManagement();
                     break;
-                case 3: 
+                case 3:
+                    facultyManagement();
                     break;
-                case 4: printInventory();
+                case 4:
+                    enrollment();
+                    break;
+                case 5:
+                    reports();                        
                     break;
             }
-        } */
+        } 
     }
     
-    public static void newItem()
+    public static void studentManagement()
     {
-        String name, desc;
-        double cost;
-        int qty;
         
-        String sqlQuery = "INSERT INTO INVENTORY (ITEMNAME,ITEMDESCRIPTION,ITEMCOST,ITEMQTY) VALUES (";
+    }
+
+    public static void courseManagement()
+    {
         
-        System.out.println("Please enter new item name:");
-        name = in.nextLine();
-        System.out.println("Please enter new item description:");
-        desc = in.nextLine();
-        System.out.println("Please enter new item cost:");
-        cost = in.nextDouble();
-        System.out.println("Please enter new item quantity:");
-        qty = in.nextInt();
-        
-        sqlQuery += "'" + name + "','" + desc + "'," + cost + "," + qty + ")";
-        
-        runDBQuery(sqlQuery, 'c');
-        
+    }
+
+    public static void facultyManagement()
+    {
         
     }
     
+    public static void enrollment()
+    {
+        
+    }
+
+    public static void reports()
+    {
+        
+    }
     public static void printInventory()
     {
         String sqlQuery = "SELECT * FROM INVENTORY";
