@@ -309,19 +309,334 @@ public class mainApp {
     //          course management           //
     //////////////////////////////////////////
 
-    public static void courseManagement()
-    {
-        
+    public static void courseManagement() {
+        ArrayList<Course> courses = new ArrayList<>();
+        int choice;
+    
+        do {
+            System.out.println("\n======= Course Management =======");
+            System.out.println("1 - Add a Course");
+            System.out.println("2 - Delete a Course");
+            System.out.println("3 - Edit a Course");
+            System.out.println("4 - View All Courses");
+            System.out.println("5 - Return to Main Menu");
+            System.out.println("=================================");
+            System.out.print("Enter your choice: ");
+            choice = readIntInput();
+    
+            switch (choice) {
+                case 1:
+                    addCourse(courses);
+                    break;
+                case 2:
+                    deleteCourse(courses);
+                    break;
+                case 3:
+                    editCourse(courses);
+                    break;
+                case 4:
+                    viewCourses(courses);
+                    break;
+                case 5:
+                    System.out.println("Returning to the main menu...\n");
+                    return;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        } while (choice != 5);
     }
+    
+    public static void addCourse(ArrayList<Course> courses) {
+        System.out.println("\n=== Add a New Course ===");
+    
+        System.out.print("Enter course prefix (e.g., CSC): ");
+        String prefix = in.nextLine();
+    
+        System.out.print("Enter course number: ");
+        String number = in.nextLine();
+    
+        System.out.print("Enter course days (e.g., Mon/Wed/Fri): ");
+        String days = in.nextLine();
+    
+        System.out.print("Enter start time (e.g., 9:00 AM): ");
+        String startTime = in.nextLine();
+    
+        System.out.print("Enter end time (e.g., 10:00 AM): ");
+        String endTime = in.nextLine();
+    
+        System.out.print("Enter credit hours: ");
+        int creditHours = readIntInput();
+    
+        System.out.print("Enter subject: ");
+        String subject = in.nextLine();
+    
+        Faculty faculty = new Faculty(); // Assume a new faculty member is assigned for simplicity
+    
+        courses.add(new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty));
+        System.out.println("Course added successfully!");
+    }
+    
+    public static void deleteCourse(ArrayList<Course> courses) {
+        System.out.println("\n=== Delete a Course ===");
+        if (courses.isEmpty()) {
+            System.out.println("No courses available to delete.");
+            return;
+        }
+    
+        System.out.print("Enter course number to delete: ");
+        String courseNumber = in.nextLine();
+    
+        boolean found = false;
+        for (Course course : courses) {
+            if (courseNumber.equals(course.getCourseNumber())) {
+                courses.remove(course);
+                System.out.println("Course removed successfully!");
+                found = true;
+                break;
+            }
+        }
+    
+        if (!found) {
+            System.out.println("Course not found.");
+        }
+    }
+    
+    public static void editCourse(ArrayList<Course> courses) {
+        System.out.println("\n=== Edit a Course ===");
+        if (courses.isEmpty()) {
+            System.out.println("No courses available to edit.");
+            return;
+        }
+    
+        System.out.print("Enter course number to edit: ");
+        String courseNumber = in.nextLine();
+    
+        for (Course course : courses) {
+            if (courseNumber.equals(course.getCourseNumber())) {
+                System.out.println("Editing course: " + course.getCourseName());
+    
+                System.out.print("Enter new days of week: ");
+                String days = in.nextLine();
+                course.setDaysOfWeek(days);
+    
+                System.out.print("Enter new start time: ");
+                String startTime = in.nextLine();
+                course.setStartTime(startTime);
+    
+                System.out.print("Enter new end time: ");
+                String endTime = in.nextLine();
+                course.setEndTime(endTime);
+    
+                System.out.print("Enter new credit hours: ");
+                int creditHours = readIntInput();
+                course.setCreditHours(creditHours);
+    
+                System.out.print("Enter new subject: ");
+                String subject = in.nextLine();
+                course.setSubject(subject);
+    
+                System.out.println("Course updated successfully!");
+                return;
+            }
+        }
+    
+        System.out.println("Course not found.");
+    }
+    
+    public static void viewCourses(ArrayList<Course> courses) {
+        System.out.println("\n=== All Courses ===");
+        if (courses.isEmpty()) {
+            System.out.println("No courses available.");
+            return;
+        }
+    
+        for (Course course : courses) {
+            System.out.println(course);
+        }
+    }
+
+    public static int readIntInput() {
+        System.out.print("Enter a number: ");
+        String input = in.nextLine();
+        boolean isValid = false;
+        int result = 0;
+    
+        // Validate input
+        while (!isValid) {
+            isValid = true; // Assume valid input initially
+            result = 0; // Reset result for each attempt
+    
+            for (int i = 0; i < input.length(); i++) {
+                char currentChar = input.charAt(i);
+    
+                // Ensure each character is a digit
+                if (!Character.isDigit(currentChar)) {
+                    isValid = false;
+                    break;
+                }
+    
+                // Convert character to digit and calculate the integer value
+                result = result * 10 + (currentChar - '0');
+            }
+    
+            if (!isValid || input.isEmpty()) {
+                System.out.print("Invalid input. Please enter a valid number: ");
+                input = in.nextLine();
+            }
+        }
+    
+        // At this point, input is guaranteed to be valid
+        return result;
+    }
+    
+    
 
     //////////////////////////////////////////
     //          fac management              //
     //////////////////////////////////////////
 
-    public static void facultyManagement()
-    {
-        
+
+    public static void facultyManagement() {
+        ArrayList<Faculty> facultyList = new ArrayList<>();
+        int choice;
+
+        do {
+            System.out.println("\n====== Faculty Management ======");
+            System.out.println("1 - Add a Faculty Member");
+            System.out.println("2 - Delete a Faculty Member");
+            System.out.println("3 - Edit a Faculty Member");
+            System.out.println("4 - View All Faculty Members");
+            System.out.println("5 - Return to Main Menu");
+            System.out.println("================================");
+            System.out.print("Enter your choice: ");
+            choice = in.nextInt();
+            in.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addFaculty(facultyList);
+                    break;
+                case 2:
+                    deleteFaculty(facultyList);
+                    break;
+                case 3:
+                    editFaculty(facultyList);
+                    break;
+                case 4:
+                    viewFaculty(facultyList);
+                    break;
+                case 5:
+                    System.out.println("Returning to the main menu...\n");
+                    break;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        } while (choice != 5);
     }
+
+    public static void addFaculty(ArrayList<Faculty> facultyList) {
+        System.out.println("\n=== Add Faculty Member ===");
+        System.out.print("Enter First Name: ");
+        String firstName = in.nextLine();
+        System.out.print("Enter Last Name: ");
+        String lastName = in.nextLine();
+        System.out.print("Enter Email: ");
+        String email = in.nextLine();
+        System.out.print("Enter SSN: ");
+        String ssn = in.nextLine();
+        System.out.print("Enter Department: ");
+        String departmentName = in.nextLine();
+        System.out.print("Enter Office Building: ");
+        String officeBuilding = in.nextLine();
+        System.out.print("Enter Office Number: ");
+        String officeNumber = in.nextLine();
+        System.out.print("Enter Phone Number: ");
+        String phoneNumber = in.nextLine();
+        System.out.print("Enter Rank: ");
+        String rank = in.nextLine();
+
+        Department department = new Department(departmentName);
+        Faculty newFaculty = new Faculty(firstName, lastName, email, ssn, department, officeBuilding, officeNumber, phoneNumber, rank);
+        facultyList.add(newFaculty);
+
+        System.out.println("Faculty member added successfully!");
+    }
+
+    public static void deleteFaculty(ArrayList<Faculty> facultyList) {
+        System.out.println("\n=== Delete Faculty Member ===");
+        System.out.print("Enter Faculty University ID to Delete: ");
+        int universityID = in.nextInt();
+        in.nextLine(); // Consume newline
+
+        Faculty facultyToRemove = null;
+        for (Faculty faculty : facultyList) {
+            if (faculty.getUniversityID() == universityID) {
+                facultyToRemove = faculty;
+                break;
+            }
+        }
+
+        if (facultyToRemove != null) {
+            facultyList.remove(facultyToRemove);
+            System.out.println("Faculty member removed successfully!");
+        } else {
+            System.out.println("No faculty member found with that ID.");
+        }
+    }
+
+    public static void editFaculty(ArrayList<Faculty> facultyList) {
+        System.out.println("\n=== Edit Faculty Member ===");
+        System.out.print("Enter Faculty University ID to Edit: ");
+        int universityID = in.nextInt();
+        in.nextLine(); // Consume newline
+
+        Faculty facultyToEdit = null;
+        for (Faculty faculty : facultyList) {
+            if (faculty.getUniversityID() == universityID) {
+                facultyToEdit = faculty;
+                break;
+            }
+        }
+
+        if (facultyToEdit == null) {
+            System.out.println("No faculty member found with that ID.");
+            return;
+        }
+
+        System.out.println("Editing Faculty Member: " + facultyToEdit.getFirstName() + " " + facultyToEdit.getLastName());
+        System.out.print("Enter New First Name (or press Enter to keep current): ");
+        String newFirstName = in.nextLine();
+        if (!newFirstName.isEmpty()) facultyToEdit.firstName = newFirstName;
+
+        System.out.print("Enter New Last Name (or press Enter to keep current): ");
+        String newLastName = in.nextLine();
+        if (!newLastName.isEmpty()) facultyToEdit.lastName = newLastName;
+
+        System.out.print("Enter New Email (or press Enter to keep current): ");
+        String newEmail = in.nextLine();
+        if (!newEmail.isEmpty()) facultyToEdit.setEmail(newEmail);
+
+        System.out.print("Enter New Phone Number (or press Enter to keep current): ");
+        String newPhoneNumber = in.nextLine();
+        if (!newPhoneNumber.isEmpty()) facultyToEdit.setPhoneNumber(newPhoneNumber);
+
+        System.out.print("Enter New Rank (or press Enter to keep current): ");
+        String newRank = in.nextLine();
+        if (!newRank.isEmpty()) facultyToEdit.setRank(newRank);
+
+        System.out.println("Faculty member updated successfully!");
+    }
+
+    public static void viewFaculty(ArrayList<Faculty> facultyList) {
+        System.out.println("\n=== Faculty Members ===");
+        for (Faculty faculty : facultyList) {
+            System.out.println(faculty);
+        }
+        if (facultyList.isEmpty()) {
+            System.out.println("No faculty members available.");
+        }
+    }
+
     
 
     //////////////////////////////////////////
