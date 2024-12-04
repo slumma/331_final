@@ -177,12 +177,12 @@ public class mainApp {
         // shows all students that can be edited 
         displayStudentNamesAndIDs(students);
 
-        // Ask for the universityID of the student to edit
+        // ask for the universityID of the student to edit
         System.out.print("Enter the University ID of the student to edit: ");
         int universityID = in.nextInt();
         in.nextLine(); // Consume the newline character
     
-        // Find the student with the matching University ID
+        // find the student with the matching universityID
         Student studentToEdit = null;
         for (Student student : students) {
             if (student.getUniversityID() == universityID) {
@@ -191,11 +191,11 @@ public class mainApp {
             }
         }
     
-        // If student is found, proceed with editing their details
+        // ff student found, edit their details
         if (studentToEdit != null) {
             System.out.println("Editing details for student with University ID: " + universityID);
     
-            // Edit the student's details
+            // edit the student's details
             System.out.print("Enter new first name (current: " + studentToEdit.getFirstName() + "): ");
             String newFirstName = in.nextLine();
             if (!newFirstName.isEmpty()) {
@@ -218,8 +218,8 @@ public class mainApp {
             double newGPA = in.nextDouble();
             studentToEdit.setGPA(newGPA);
     
-            // Edit the student's home address
-            in.nextLine(); // Consume the newline character
+            // edit the student address
+            in.nextLine(); 
             System.out.print("Enter new home street address (current: " + studentToEdit.getHomeStreet() + "): ");
             String newHomeStreet = in.nextLine();
             if (!newHomeStreet.isEmpty()) {
@@ -244,7 +244,7 @@ public class mainApp {
                 studentToEdit.setHomeZIP(newHomeZIP);
             }
     
-            // Edit the student's emergency contact information
+            // edit the student's emergency contact information
             System.out.print("Enter new emergency contact name (current: " + studentToEdit.getEContactName() + "): ");
             String newEContactName = in.nextLine();
             if (!newEContactName.isEmpty()) {
@@ -288,13 +288,13 @@ public class mainApp {
     }
     
     public static void displayStudentNamesAndIDs(ArrayList<Student> students) {
-        // Check if the list is empty
+        // check if the list is empty
         if (students.isEmpty()) {
             System.out.println("No students to display.");
-            return;
+            return; // exits method
         }
         
-        // Iterate over the list of students and print their name and ID
+        // iterate over the list of students and print their name and ID
         System.out.println("===== Student List =====");
         for (Student student : students) {
             System.out.println("=== Student ===");
@@ -306,18 +306,28 @@ public class mainApp {
     }
     
     //////////////////////////////////////////
-
+    //          course management           //
+    //////////////////////////////////////////
 
     public static void courseManagement()
     {
         
     }
 
+    //////////////////////////////////////////
+    //          fac management              //
+    //////////////////////////////////////////
+
     public static void facultyManagement()
     {
         
     }
     
+
+    //////////////////////////////////////////
+    //          Enrollment           //
+    //////////////////////////////////////////
+
     public static void enrollment()
     {
         
