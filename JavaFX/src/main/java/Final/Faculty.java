@@ -72,7 +72,7 @@ public class Faculty extends Person {
                "Department      : " + departmentName + "\n" +
                "Office          : " + officeNumber + "\n" +
                "Phone           : " + phoneNumber + "\n" +
-               "Rank            : " + rank + "\n" +
+               "Position        : " + rank + "\n" +
                "===========================================================\n";
     }
 
