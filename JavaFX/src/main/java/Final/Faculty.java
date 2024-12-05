@@ -67,6 +67,7 @@ public class Faculty extends Person {
         }
 
         return "===================== Faculty Details =====================\n" +
+               "ID              : " + getUniversityID() + "\n" +
                "First Name      : " + getFirstName() + "\n" +
                "Last Name       : " + getLastName() + "\n" +
                "Department      : " + departmentName + "\n" +

@@ -31,22 +31,22 @@ public class mainApp {
         // tests /////////////////////////////////////////////
 
         // Create some departments
+        departments.add(new Department("Computer Information Systems"));
         departments.add(new Department("Computer Science"));
-        departments.add(new Department("Mathematics"));
-        departments.add(new Department("Engineering"));
+        departments.add(new Department("Systems Thinking"));
 
         // Mock Faculty
-        faculty.add(new Faculty("Dr. Alan", "Turing", "alan.turing@example.com", "123-45-6789", 
-                departments.get(0), "Tech Building", "101", "555-1234", "Professor"));
-        faculty.add(new Faculty("Prof. Ada", "Lovelace", "ada.lovelace@example.com", "987-65-4321", 
-                departments.get(0), "Tech Building", "102", "555-5678", "Associate Professor"));
-        faculty.add(new Faculty("Dr. Charles", "Babbage", "charles.babbage@example.com", "111-11-1111", 
-                departments.get(1), "Math Hall", "201", "555-8765", "Assistant Professor"));
+        faculty.add(new Faculty("Jeremy", "Ezell", "jeremy@example.com", "123-45-6789", 
+                departments.get(0), "College of Business", "5522", "555-1234", "Professor"));
+        faculty.add(new Faculty("Dymtro", "Babik", "babik@example.com", "987-65-4321", 
+                departments.get(1), "Showker", "1102", "555-5678", "Associate Professor"));
+        faculty.add(new Faculty("Sean", "Lough", "seanLough@example.com", "111-11-1111", 
+                departments.get(2), "Hartman Hall", "2021", "555-8765", "Professor"));
 
         // Mock Courses
-        courses.add(new Course("CS", "101", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", 3, "Introduction to Computer Science", faculty.get(0)));
-        courses.add(new Course("CS", "102", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", 3, "Data Structures", faculty.get(1)));
-        courses.add(new Course("MATH", "101", "Tue, Thu", "10:00 AM", "11:30 AM", 4, "Calculus I", faculty.get(2)));
+        courses.add(new Course("CIS", "221", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", 3, "Introduction to Computer Science", faculty.get(2)));
+        courses.add(new Course("CIS", "331", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", 3, "Advanced Programming", faculty.get(0)));
+        courses.add(new Course("COB", "304", "Tue, Thu", "10:00 AM", "11:30 AM", 4, "Enterprise Architecture", faculty.get(1)));
 
         // Mock Students (using the new constructor with all parameters)
         students.add(new Student("John", "Doe", "john.doe@example.com", "123-45-6789", 3.7, 
@@ -90,17 +90,17 @@ public class mainApp {
             switch (menuChoice)
             {
                 case 1: 
-                    ArrayList<Student> newStudents = studentManagement();
+                    ArrayList<Student> newStudents = studentManagement(students);
 
                     students.addAll(newStudents);
                     break;
                 case 2:
-                    ArrayList<Course> newCourses = courseManagement();
+                    ArrayList<Course> newCourses = courseManagement(courses);
 
                     courses.addAll(newCourses);
                     break;
                 case 3:
-                    ArrayList<Faculty> newFaculty = facultyManagement();
+                    ArrayList<Faculty> newFaculty = facultyManagement(faculty);
 
                     faculty.addAll(newFaculty);
                     break;
@@ -116,9 +116,15 @@ public class mainApp {
         } 
     }
     
-    // student management
-    public static ArrayList<Student> studentManagement() {
+    //////////////////////////////////////////
+    //                                      //
+    //          course management           //
+    //                                      //
+    //////////////////////////////////////////
+    
+    public static ArrayList<Student> studentManagement(ArrayList<Student> currentStudents) {
         ArrayList<Student> students = new ArrayList<>();
+        students.addAll(currentStudents);
         int choice;
 
         do {
@@ -126,7 +132,8 @@ public class mainApp {
             System.out.println("1 - Add a Student");
             System.out.println("2 - Delete a Student");
             System.out.println("3 - Edit a Student");
-            System.out.println("4 - Return to Main Menu");
+            System.out.println("4 - View all students");
+            System.out.println("5 - Exit to main menu");
             System.out.println("================================");
             System.out.print("Enter your choice: ");
             choice = in.nextInt();
@@ -143,6 +150,9 @@ public class mainApp {
                     editStudent(students);
                     break;
                 case 4:
+                    displayStudentNamesAndIDs(students);
+                    break;
+                case 5:
                     System.out.println("Returning to the main menu...\n");
                     choice = 5;
                     break;
@@ -359,7 +369,7 @@ public class mainApp {
         // iterate over the list of students and print their name and ID
         System.out.println("===== Student List =====");
         for (Student student : students) {
-            System.out.println("=== Student ===");
+            System.out.println("=====================");
             System.out.println("Name   : " + student.getFirstName() + " " + student.getLastName());
             System.out.println("ID     : " + student.getUniversityID());
             System.out.println("=====================");
@@ -368,11 +378,14 @@ public class mainApp {
     }
     
     //////////////////////////////////////////
+    //                                      //
     //          course management           //
+    //                                      //
     //////////////////////////////////////////
 
-    public static ArrayList<Course> courseManagement() {
+    public static ArrayList<Course> courseManagement(ArrayList<Course> currentCourses) {
         ArrayList<Course> courses = new ArrayList<>();
+        courses.addAll(currentCourses);
         int choice;
     
         do {
@@ -557,12 +570,15 @@ public class mainApp {
     
 
     //////////////////////////////////////////
+    //                                      //
     //          fac management              //
+    //                                      //
     //////////////////////////////////////////
 
 
-    public static ArrayList<Faculty> facultyManagement() {
+    public static ArrayList<Faculty> facultyManagement(ArrayList<Faculty> currentMembers) {
         ArrayList<Faculty> facultyList = new ArrayList<>();
+        facultyList.addAll(currentMembers);
         int choice;
 
         do {
@@ -654,6 +670,9 @@ public class mainApp {
 
     public static void editFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Edit Faculty Member ===");
+
+        viewFaculty(facultyList);
+
         System.out.print("Enter Faculty University ID to Edit: ");
         int universityID = in.nextInt();
         in.nextLine(); // Consume newline
@@ -706,7 +725,9 @@ public class mainApp {
     }
 
     //////////////////////////////////////////
+    //                                      //
     //              Enrollment              //
+    //                                      //
     //////////////////////////////////////////
 
     public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, Semester semester) {
@@ -777,7 +798,9 @@ public class mainApp {
     
 
     //////////////////////////////////////////
+    //                                      //
     //              Reports                 //
+    //                                      //
     //////////////////////////////////////////
 
     public static void reports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Schedule> schedules, ArrayList<Faculty> faculty) {

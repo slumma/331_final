@@ -81,14 +81,8 @@ public class Person {
         this.lastName = lastName;
     }
     
-    public void setEmail(String email) {
-        // checks if the email the user provided has an '@' and '.' ==> both parts must be in it to be valid 
-        boolean isValid = email.contains("@") && email.contains(".");
-        if (isValid) {
-            this.emailAddress = email;
-        } else {
-            System.out.println("Error: Email must contain '@' and '.' symbols. Please enter a valid email:");
-        }
+    public void   setEmail(String email) {
+        this.emailAddress = email; 
     }
 
     // Getter methods for first and last name
