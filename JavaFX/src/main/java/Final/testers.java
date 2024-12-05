@@ -31,9 +31,9 @@ public class testers {
         Semester semester = new Semester("Fall", 2024, 16);
 
         // Example Courses
-        Course course1 = new Course("CS", "101", "Mon, Wed, Fri", "9:00 AM", "10:15 AM", 3, 
+        Course course1 = new Course("CS", "101", "Mon, Wed, Fri", "9:00 AM", "10:15 AM", "3", 
                                     "Computer Science", faculty1);
-        Course course2 = new Course("MATH", "201", "Tue, Thu", "10:30 AM", "11:45 AM", 4, 
+        Course course2 = new Course("MATH", "201", "Tue, Thu", "10:30 AM", "11:45 AM", "4", 
                                     "Computer Science", faculty2);
 
         // Example Schedules

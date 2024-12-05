@@ -44,9 +44,9 @@ public class mainApp {
                 departments.get(2), "Hartman Hall", "2021", "555-8765", "Professor"));
 
         // Mock Courses
-        courses.add(new Course("CIS", "221", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", 3, "Introduction to Computer Science", faculty.get(2)));
-        courses.add(new Course("CIS", "331", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", 3, "Advanced Programming", faculty.get(0)));
-        courses.add(new Course("COB", "304", "Tue, Thu", "10:00 AM", "11:30 AM", 4, "Enterprise Architecture", faculty.get(1)));
+        courses.add(new Course("CIS", "221", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", "3", "Introduction to Computer Science", faculty.get(2)));
+        courses.add(new Course("CIS", "331", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", "3", "Advanced Programming", faculty.get(0)));
+        courses.add(new Course("COB", "304", "Tue, Thu", "10:00 AM", "11:30 AM", "4", "Enterprise Architecture", faculty.get(1)));
 
         // Mock Students (using the new constructor with all parameters)
         students.add(new Student("John", "Doe", "john.doe@example.com", "123-45-6789", 3.7, 
@@ -90,22 +90,16 @@ public class mainApp {
             switch (menuChoice)
             {
                 case 1: 
-                    ArrayList<Student> newStudents = studentManagement(students);
-
-                    students.addAll(newStudents);
+                    studentManagement(students);
                     break;
                 case 2:
-                    ArrayList<Course> newCourses = courseManagement(courses);
-
-                    courses.addAll(newCourses);
+                    courseManagement(courses);
                     break;
                 case 3:
-                    ArrayList<Faculty> newFaculty = facultyManagement(faculty);
-
-                    faculty.addAll(newFaculty);
+                    facultyManagement(faculty);
                     break;
                 case 4:
-                    Schedule newEnrollments = enrollment(students, courses, currentSemester);
+                    Schedule newEnrollments = enrollment(students, courses, schedules, currentSemester);
 
                     schedules.add(newEnrollments);
                     break;
@@ -122,9 +116,7 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
     
-    public static ArrayList<Student> studentManagement(ArrayList<Student> currentStudents) {
-        ArrayList<Student> students = new ArrayList<>();
-        students.addAll(currentStudents);
+    public static void studentManagement(ArrayList<Student> students) {
         int choice;
 
         do {
@@ -160,8 +152,6 @@ public class mainApp {
                     System.out.println("Invalid choice! Please try again.");
             }
         } while (choice != 5);
-
-        return students;
 
     }
 
@@ -383,7 +373,7 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
 
-    public static ArrayList<Course> courseManagement(ArrayList<Course> currentCourses) {
+    public static void courseManagement(ArrayList<Course> currentCourses) {
         ArrayList<Course> courses = new ArrayList<>();
         courses.addAll(currentCourses);
         int choice;
@@ -397,7 +387,8 @@ public class mainApp {
             System.out.println("5 - Return to Main Menu");
             System.out.println("=================================");
             System.out.print("Enter your choice: ");
-            choice = readIntInput();
+            choice = in.nextInt();
+            in.nextLine();
     
             switch (choice) {
                 case 1:
@@ -421,7 +412,6 @@ public class mainApp {
             }
         } while (choice != 5);
 
-        return courses;
     }
     
     public static void addCourse(ArrayList<Course> courses) {
@@ -443,7 +433,7 @@ public class mainApp {
         String endTime = in.nextLine();
     
         System.out.print("Enter credit hours: ");
-        int creditHours = readIntInput();
+        String creditHours = in.nextLine();
     
         System.out.print("Enter subject: ");
         String subject = in.nextLine();
@@ -485,6 +475,8 @@ public class mainApp {
             System.out.println("No courses available to edit.");
             return;
         }
+
+        viewCourses(courses);
     
         System.out.print("Enter course number to edit: ");
         String courseNumber = in.nextLine();
@@ -506,7 +498,7 @@ public class mainApp {
                 course.setEndTime(endTime);
     
                 System.out.print("Enter new credit hours: ");
-                int creditHours = readIntInput();
+                String creditHours = in.nextLine();
                 course.setCreditHours(creditHours);
     
                 System.out.print("Enter new subject: ");
@@ -529,44 +521,15 @@ public class mainApp {
         }
     
         for (Course course : courses) {
-            System.out.println(course);
+            System.out.println("=======================");
+            System.out.println("Course ID     : " + course.getCourseID());
+            System.out.println("Course Name   : " + course.getCourseName());
+            System.out.println("Subject       : " + course.getSubject());
+            System.out.println("Faculty       : " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
+            System.out.println("=======================");
         }
+        
     }
-
-    public static int readIntInput() {
-        System.out.print("Enter a number: ");
-        String input = in.nextLine();
-        boolean isValid = false;
-        int result = 0;
-    
-        // Validate input
-        while (!isValid) {
-            isValid = true; // Assume valid input initially
-            result = 0; // Reset result for each attempt
-    
-            for (int i = 0; i < input.length(); i++) {
-                char currentChar = input.charAt(i);
-    
-                // Ensure each character is a digit
-                if (!Character.isDigit(currentChar)) {
-                    isValid = false;
-                    break;
-                }
-    
-                // Convert character to digit and calculate the integer value
-                result = result * 10 + (currentChar - '0');
-            }
-    
-            if (!isValid || input.isEmpty()) {
-                System.out.print("Invalid input. Please enter a valid number: ");
-                input = in.nextLine();
-            }
-        }
-    
-        // At this point, input is guaranteed to be valid
-        return result;
-    }
-    
     
 
     //////////////////////////////////////////
@@ -576,7 +539,7 @@ public class mainApp {
     //////////////////////////////////////////
 
 
-    public static ArrayList<Faculty> facultyManagement(ArrayList<Faculty> currentMembers) {
+    public static void facultyManagement(ArrayList<Faculty> currentMembers) {
         ArrayList<Faculty> facultyList = new ArrayList<>();
         facultyList.addAll(currentMembers);
         int choice;
@@ -615,7 +578,6 @@ public class mainApp {
             }
         } while (choice != 5);
 
-        return facultyList;
     }
 
     public static void addFaculty(ArrayList<Faculty> facultyList) {
@@ -730,7 +692,7 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
 
-    public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, Semester semester) {
+    public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, ArrayList<Schedule> schedules, Semester semester) {
         // Display available students
         System.out.println("Available Students:");
         for (Student student : students) {
@@ -765,7 +727,7 @@ public class mainApp {
             System.out.println("Professor    : " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
             System.out.println("=====================");
         }
-
+    
         // Ask for the course to enroll in
         System.out.print("\nEnter the course ID to enroll in: ");
         int courseID = in.nextInt();
@@ -785,16 +747,31 @@ public class mainApp {
             return null; // Return null if course not found
         }
     
-        // Create or update the student's schedule
-        Schedule schedule = new Schedule(student, semester, new ArrayList<>());
-        schedule.addCourse(selectedCourse);
+        // Check if the student already has a schedule
+        Schedule studentSchedule = null;
+        for (Schedule schedule : schedules) {
+            if (schedule.getStudent().equals(student)) {
+                studentSchedule = schedule;
+                break;
+            }
+        }
+    
+        // If no schedule exists, create a new one
+        if (studentSchedule == null) {
+            studentSchedule = new Schedule(student, semester, new ArrayList<>());
+            schedules.add(studentSchedule); // Add the new schedule to the list
+        }
+    
+        // Add the selected course to the student's schedule
+        studentSchedule.addCourse(selectedCourse);
     
         // Confirmation message
         System.out.println(student.getFirstName() + " " + student.getLastName() + " successfully enrolled in " + selectedCourse.getCourseName() + "\n");
     
-        // Return the student's schedule
-        return schedule;
+        // Return the updated schedule
+        return studentSchedule;
     }
+    
     
 
     //////////////////////////////////////////

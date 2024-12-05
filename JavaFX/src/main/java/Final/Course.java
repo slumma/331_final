@@ -7,7 +7,7 @@ public class Course {
     private String daysOfWeek;
     private String startTime;
     private String endTime;
-    private int creditHours;
+    private String creditHours;
     private String subject;
     private Faculty faculty; // stores a faculty member with the course
 
@@ -21,7 +21,7 @@ public class Course {
         this.daysOfWeek = "N/A";
         this.startTime = "N/A";
         this.endTime = "N/A";
-        this.creditHours = 0;
+        this.creditHours = "0";
         this.subject = "N/A";
         this.faculty = new Faculty(); // creates new blank faculty member if the course is blank 
 
@@ -29,7 +29,7 @@ public class Course {
     }
 
     public Course(String coursePrefix, String courseNumber, String daysOfWeek, String startTime, 
-                  String endTime, int creditHours, String subject, Faculty faculty) {
+                  String endTime, String creditHours, String subject, Faculty faculty) {
         this.coursePrefix = coursePrefix;
         this.courseNumber = courseNumber;
         this.courseName = coursePrefix + courseNumber; // Concatenate prefix and number to form the course name
@@ -100,11 +100,11 @@ public class Course {
         this.endTime = endTime;
     }
 
-    public int getCreditHours() {
+    public String getCreditHours() {
         return creditHours;
     }
 
-    public void setCreditHours(int creditHours) {
+    public void setCreditHours(String creditHours) {
         this.creditHours = creditHours;
     }
 
