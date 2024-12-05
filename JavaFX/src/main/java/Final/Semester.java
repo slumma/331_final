@@ -1,5 +1,11 @@
 package Final;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
 public class Semester {
     private String period;  // e.g., "Fall", "Spring", "Summer"
     private int year;

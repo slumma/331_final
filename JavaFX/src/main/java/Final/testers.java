@@ -2,6 +2,12 @@ package Final;
 
 import java.util.ArrayList;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
 public class testers {
 
     public static void main(String[] args) {

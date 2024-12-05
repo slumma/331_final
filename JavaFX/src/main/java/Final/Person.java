@@ -1,6 +1,12 @@
 package Final;
 import java.util.Scanner;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
 public class Person {
 
     // general info about person -- will be used for both students and professors

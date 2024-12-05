@@ -1,5 +1,11 @@
 package Final;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
 public class Course {
     private String coursePrefix;
     private String courseNumber;

@@ -1,6 +1,13 @@
 package Final;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class Department {
 
@@ -37,6 +44,10 @@ public class Department {
     // Getter for department name
     public String getDepartmentName() {
         return departmentName;
+    }
+
+     public List<Faculty> getFacultyMembers() {
+        return members;
     }
 
     // Method to return a string representation of the Department

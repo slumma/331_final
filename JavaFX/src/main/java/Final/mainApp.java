@@ -1,15 +1,24 @@
 package Final;
 
+/*
+Programmer Name(s) : Sam Ogden, Amy Lee, Noemi Villar Glass
+CIS 331
+Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
+*/
+
+//import java.lang.classfile.ClassFile;  --> error saying its a preview API (?)
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import oracle.jdbc.pool.OracleDataSource;
 
 public class mainApp {
 
+    // for part 3
     public static OracleDataSource oDS;
     public static Connection jsqlConn;
     public static PreparedStatement jsqlStmt;
@@ -22,33 +31,42 @@ public class mainApp {
         int menuChoice = 0;
         Semester currentSemester = new Semester("Fall", 2024, 15); // current semester irl
 
+        // initalize lists that will hold pretty much everything 
         ArrayList<Student> students = new ArrayList<>();
         ArrayList<Faculty> faculty = new ArrayList<>();
         ArrayList<Course> courses = new ArrayList<>();
         ArrayList<Department> departments = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
         
-        // tests /////////////////////////////////////////////
+        /////////////// testing values - DELETE IF NEEDED /////////////////////////////////////////////
 
-        // Create some departments
+        // create some departments
         departments.add(new Department("Computer Information Systems"));
         departments.add(new Department("Computer Science"));
         departments.add(new Department("Systems Thinking"));
 
-        // Mock Faculty
-        faculty.add(new Faculty("Jeremy", "Ezell", "jeremy@example.com", "123-45-6789", 
-                departments.get(0), "College of Business", "5522", "555-1234", "Professor"));
-        faculty.add(new Faculty("Dymtro", "Babik", "babik@example.com", "987-65-4321", 
-                departments.get(1), "Showker", "1102", "555-5678", "Associate Professor"));
-        faculty.add(new Faculty("Sean", "Lough", "seanLough@example.com", "111-11-1111", 
-                departments.get(2), "Hartman Hall", "2021", "555-8765", "Professor"));
+        // initialize faculty members and add them to departments and faculty list
+        Faculty faculty1 = new Faculty("Jeremy", "Ezell", "jeremy@example.com", "123-45-6789", 
+                        departments.get(0), "College of Business", "5522", "555-1234", "Professor");
+        faculty.add(faculty1);
+        departments.get(0).addFaculty(faculty1); 
 
-        // Mock Courses
+        Faculty faculty2 = new Faculty("Dymtro", "Babik", "babik@example.com", "987-65-4321", 
+                        departments.get(1), "Showker", "1102", "555-5678", "Associate Professor");
+        faculty.add(faculty2);
+        departments.get(1).addFaculty(faculty2); 
+
+        Faculty faculty3 = new Faculty("Sean", "Lough", "seanLough@example.com", "111-11-1111", 
+                        departments.get(2), "Hartman Hall", "2021", "555-8765", "Professor");
+        faculty.add(faculty3); 
+        departments.get(2).addFaculty(faculty3); 
+
+        // create courses
         courses.add(new Course("CIS", "221", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", "3", "Introduction to Computer Science", faculty.get(2)));
         courses.add(new Course("CIS", "331", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", "3", "Advanced Programming", faculty.get(0)));
         courses.add(new Course("COB", "304", "Tue, Thu", "10:00 AM", "11:30 AM", "4", "Enterprise Architecture", faculty.get(1)));
 
-        // Mock Students (using the new constructor with all parameters)
+        // mock Students 
         students.add(new Student("John", "Doe", "john.doe@example.com", "123-45-6789", 3.7, 
                 "123 Elm St", "Hometown", "VA", "12345", "Mary Doe", "555-1111", 
                 "456 Oak St", "Hometown", "VA", "12345"));
@@ -72,6 +90,8 @@ public class mainApp {
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+        // main menu -- functions as long as user doesnt choose exit 
         while (menuChoice != 6)
         {
             System.out.println("======SCC Management Software======");
@@ -96,7 +116,7 @@ public class mainApp {
                     courseManagement(courses);
                     break;
                 case 3:
-                    facultyManagement(faculty);
+                    facultyManagement(faculty, departments);
                     break;
                 case 4:
                     Schedule newEnrollments = enrollment(students, courses, schedules, currentSemester);
@@ -104,7 +124,7 @@ public class mainApp {
                     schedules.add(newEnrollments);
                     break;
                 case 5:
-                    reports(courses, students, schedules, faculty);                        
+                    reports(courses, students, schedules, faculty, departments);                        
                     break;
             }
         } 
@@ -119,6 +139,7 @@ public class mainApp {
     public static void studentManagement(ArrayList<Student> students) {
         int choice;
 
+        // student management sub menu 
         do {
             System.out.println("\n====== Student Management ======");
             System.out.println("1 - Add a Student");
@@ -156,6 +177,8 @@ public class mainApp {
     }
 
     public static void addStudent(ArrayList<Student> students) {
+
+        // grabs information to use the Student constructor 
         System.out.print("Enter First Name: ");
         String firstName = in.nextLine();
         System.out.print("Enter Last Name: ");
@@ -168,7 +191,7 @@ public class mainApp {
         double gpa = in.nextDouble();
         in.nextLine(); // Consume newline
     
-        // Home address
+        // address
         System.out.print("Enter Home Street: ");
         String homeStreet = in.nextLine();
         System.out.print("Enter Home City: ");
@@ -178,7 +201,7 @@ public class mainApp {
         System.out.print("Enter Home ZIP: ");
         String homeZIP = in.nextLine();
     
-        // Emergency contact
+        // emergency contact
         System.out.print("Enter Emergency Contact Name: ");
         String eContactName = in.nextLine();
         System.out.print("Enter Emergency Contact Phone: ");
@@ -192,14 +215,16 @@ public class mainApp {
         System.out.print("Enter Emergency Contact ZIP: ");
         String eContactZIP = in.nextLine();
     
-        // Add the student to the list
+        // adds the student to the list that was passed in by the main method 
         students.add(new Student(firstName, lastName, email, ssn, gpa, homeStreet, homeCity, homeState, homeZIP,
                 eContactName, eContactPhone, eContactStreet, eContactCity, eContactState, eContactZIP));
+
+        // confirmation message 
         System.out.println("Student added successfully!");
     }
     
     public static void deleteStudent(ArrayList<Student> students) {
-        if (students.isEmpty()) {
+        if (students.isEmpty()) { // if the student list has no students, print error and return to sub-menu 
             System.out.println("No students available to delete.");
             return;
         }
@@ -207,11 +232,11 @@ public class mainApp {
         // shows all students that can be deleted
         displayStudentNamesAndIDs(students);
     
-        // Ask for the universityID of the student to delete
+        // ask for the universityID of the student to delete
         System.out.print("Enter the University ID of the student to delete: ");
         int universityID = in.nextInt();
         
-        // Find the student with the matching University ID
+        // find the student with the matching University ID, set it as target student 
         Student studentToRemove = null;
         for (Student student : students) {
             if (student.getUniversityID() == universityID) {
@@ -220,7 +245,7 @@ public class mainApp {
             }
         }
     
-        // If student is found, remove them
+        // ff student is found, remove them
         if (studentToRemove != null) {
             students.remove(studentToRemove);
             System.out.println("Student with University ID " + universityID + " has been deleted.");
@@ -229,6 +254,7 @@ public class mainApp {
         }
     }
 
+    // edits student info
     public static void editStudent(ArrayList<Student> students) {
         if (students.isEmpty()) {
             System.out.println("No students available to edit.");
@@ -255,6 +281,8 @@ public class mainApp {
     
         // ff student found, edit their details
         if (studentToEdit != null) {
+
+            // IF USER DOES NOT ENTER ANYTHING (HITS ENTER) IT KEEPS SAME INFO
             System.out.println("Editing details for student with University ID: " + universityID);
     
             // edit the student's details
@@ -349,6 +377,7 @@ public class mainApp {
         }
     }
     
+    // method so that dont have to write this code over and over to print all students 
     public static void displayStudentNamesAndIDs(ArrayList<Student> students) {
         // check if the list is empty
         if (students.isEmpty()) {
@@ -373,6 +402,8 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
 
+
+    // 90% of this comes from the studentManagement methods so refer to comments there 
     public static void courseManagement(ArrayList<Course> currentCourses) {
         ArrayList<Course> courses = new ArrayList<>();
         courses.addAll(currentCourses);
@@ -438,7 +469,7 @@ public class mainApp {
         System.out.print("Enter subject: ");
         String subject = in.nextLine();
     
-        Faculty faculty = new Faculty(); // Assume a new faculty member is assigned for simplicity
+        Faculty faculty = new Faculty(); // assumes a new faculty member is assigned for simplicity, satisfy faculty requirement
     
         courses.add(new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty));
         System.out.println("Course added successfully!");
@@ -538,8 +569,8 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
 
-
-    public static void facultyManagement(ArrayList<Faculty> currentMembers) {
+    // same stuff as the other 2 management methods, just had to include departments to keep track of who is in what department for the reports
+    public static void facultyManagement(ArrayList<Faculty> currentMembers, ArrayList<Department> departments) {
         ArrayList<Faculty> facultyList = new ArrayList<>();
         facultyList.addAll(currentMembers);
         int choice;
@@ -558,7 +589,7 @@ public class mainApp {
 
             switch (choice) {
                 case 1:
-                    addFaculty(facultyList);
+                    addFaculty(facultyList, departments);
                     break;
                 case 2:
                     deleteFaculty(facultyList);
@@ -580,7 +611,7 @@ public class mainApp {
 
     }
 
-    public static void addFaculty(ArrayList<Faculty> facultyList) {
+    public static void addFaculty(ArrayList<Faculty> facultyList, ArrayList<Department> departments) {
         System.out.println("\n=== Add Faculty Member ===");
         System.out.print("Enter First Name: ");
         String firstName = in.nextLine();
@@ -600,14 +631,35 @@ public class mainApp {
         String phoneNumber = in.nextLine();
         System.out.print("Enter Position: ");
         String rank = in.nextLine();
-
-        Department department = new Department(departmentName);
+    
+        // check if department already exists
+        Department department = null;
+        for (Department dept : departments) {
+            if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
+                department = dept;
+                break;
+            }
+        }
+    
+        // if department is not found, create it
+        if (department == null) {
+            System.out.println("Department not found: " + departmentName);
+            // create new department and add to list
+            department = new Department(departmentName);
+            departments.add(department); // adds the new department to the list
+            System.out.println("New department created: " + departmentName);
+        }
+    
+        // create the new faculty member and assign it to the department
         Faculty newFaculty = new Faculty(firstName, lastName, email, ssn, department, officeBuilding, officeNumber, phoneNumber, rank);
-        facultyList.add(newFaculty);
-
-        System.out.println("Faculty member added successfully!");
+        facultyList.add(newFaculty); // adds the faculty member to the faculty list
+    
+        // Add the new faculty member to the department's faculty list
+        department.addFaculty(newFaculty); // Ensure Department has an addFaculty method
+    
+        System.out.println("Faculty member added successfully to the " + departmentName + " department!");
     }
-
+    
     public static void deleteFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Delete Faculty Member ===");
         System.out.print("Enter Faculty University ID to Delete: ");
@@ -693,18 +745,18 @@ public class mainApp {
     //////////////////////////////////////////
 
     public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, ArrayList<Schedule> schedules, Semester semester) {
-        // Display available students
+        // display available students
         System.out.println("Available Students:");
         for (Student student : students) {
             System.out.println(student.getFirstName() + " " + student.getLastName() + " - ID: " + student.getUniversityID());
         }
     
-        // Ask for student ID
+        // ask for ID
         System.out.print("\nEnter student ID to enroll: ");
         int studentID = in.nextInt();
         in.nextLine(); // Consume newline
     
-        // Find student by ID
+        // find student
         Student student = null;
         for (Student s : students) {
             if (s.getUniversityID() == studentID) {
@@ -718,7 +770,7 @@ public class mainApp {
             return null; // Return null if student not found
         }
     
-        // Display available courses
+        // display courses
         System.out.println("\nAvailable Courses:");
         for (Course course : courses) {
             System.out.println("=====================");
@@ -728,12 +780,12 @@ public class mainApp {
             System.out.println("=====================");
         }
     
-        // Ask for the course to enroll in
+        // ask for the course to enroll in
         System.out.print("\nEnter the course ID to enroll in: ");
         int courseID = in.nextInt();
         in.nextLine(); // Consume newline
     
-        // Find the selected course
+        // find the selected course
         Course selectedCourse = null;
         for (Course course : courses) {
             if (course.getCourseID() == (courseID)) {
@@ -744,10 +796,10 @@ public class mainApp {
     
         if (selectedCourse == null) {
             System.out.println("Course not found with ID: " + courseID);
-            return null; // Return null if course not found
+            return null; // return null if course not found
         }
     
-        // Check if the student already has a schedule
+        // checks if the student already has a schedule
         Schedule studentSchedule = null;
         for (Schedule schedule : schedules) {
             if (schedule.getStudent().equals(student)) {
@@ -756,19 +808,19 @@ public class mainApp {
             }
         }
     
-        // If no schedule exists, create a new one
+        // if no schedule exists, create a new one
         if (studentSchedule == null) {
             studentSchedule = new Schedule(student, semester, new ArrayList<>());
             schedules.add(studentSchedule); // Add the new schedule to the list
         }
     
-        // Add the selected course to the student's schedule
+        // add the selected course to the student's schedule
         studentSchedule.addCourse(selectedCourse);
     
-        // Confirmation message
+        // confirmation message
         System.out.println(student.getFirstName() + " " + student.getLastName() + " successfully enrolled in " + selectedCourse.getCourseName() + "\n");
     
-        // Return the updated schedule
+        // return the updated schedule
         return studentSchedule;
     }
     
@@ -780,7 +832,7 @@ public class mainApp {
     //                                      //
     //////////////////////////////////////////
 
-    public static void reports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Schedule> schedules, ArrayList<Faculty> faculty) {
+    public static void reports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Schedule> schedules, ArrayList<Faculty> faculty, ArrayList<Department> departments) {
         Scanner in = new Scanner(System.in);
         int choice;
 
@@ -809,7 +861,7 @@ public class mainApp {
                     generateCourseReport(courses);
                     break;
                 case 4:
-                    generateDepartmentReport(faculty);
+                    generateDepartmentReport(departments);
                     break;
                 case 5:
                     generateStudentScheduleReport(students, schedules);
@@ -823,6 +875,7 @@ public class mainApp {
         } while (choice != 6);  // Repeat until user exits
     }
 
+    // shows all students in database (AKA heap)
     public static void generateStudentReport(ArrayList<Student> students) {
         System.out.println("\n=== Student Report ===");
         if (students.isEmpty()) {
@@ -838,6 +891,7 @@ public class mainApp {
         }
     }
 
+    // shows all fac members in heap
     public static void generateFacultyReport(ArrayList<Faculty> faculty) {
         System.out.println("\n=== Faculty Report ===");
         if (faculty.isEmpty()) {
@@ -853,6 +907,7 @@ public class mainApp {
         }
     }
 
+    // shows all courses 
     public static void generateCourseReport(ArrayList<Course> courses) {
         System.out.println("\n=== Course Report ===");
         if (courses.isEmpty()) {
@@ -868,46 +923,31 @@ public class mainApp {
         }
     }
 
-    public static void generateDepartmentReport(ArrayList<Faculty> faculty) {
+    // shows all members in each department
+    public static void generateDepartmentReport(ArrayList<Department> departments) {
         System.out.println("\n=== Department Report ===");
-    
-        // Use ArrayLists to track department names and corresponding faculty members
-        ArrayList<String> departmentNames = new ArrayList<>();
-        ArrayList<ArrayList<String>> facultyByDepartment = new ArrayList<>();
-    
-        // Organize faculty by department
-        for (Faculty member : faculty) {
-            String department = member.getDepartment().getDepartmentName();
-            int index = departmentNames.indexOf(department);
-    
-            if (index == -1) {
-                // New department
-                departmentNames.add(department);
-                ArrayList<String> newFacultyList = new ArrayList<>();
-                newFacultyList.add(member.getFirstName() + " " + member.getLastName());
-                facultyByDepartment.add(newFacultyList);
-            } else {
-                // Existing department
-                facultyByDepartment.get(index).add(member.getFirstName() + " " + member.getLastName());
-            }
-        }
-    
-        // Display the report
-        for (int i = 0; i < departmentNames.size(); i++) {
-            System.out.println("Department: " + departmentNames.get(i));
+        for (Department department : departments) {
+            System.out.println("Department: " + department.getDepartmentName());
             System.out.println("Faculty Members:");
-            for (String facultyMember : facultyByDepartment.get(i)) {
-                System.out.println(" - " + facultyMember);
+            List<Faculty> facultyList = department.getFacultyMembers(); // gets list from department cdf
+            if (facultyList.isEmpty()) { // if empty print error message 
+                System.out.println(" - No faculty members.");
+            } else {
+                for (Faculty faculty : facultyList) { // prints name of each member in specific department
+                    System.out.println(" - " + faculty.getFirstName() + " " + faculty.getLastName() + " (" + faculty.getUniversityID() + ")");
+                }
             }
             System.out.println("--------------------------");
         }
     }
-    
+
+    // shows a schedule for specific student 
     public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules) {
         Scanner in = new Scanner(System.in);
 
         displayStudentNamesAndIDs(students);
     
+        // same logic from previous methods 
         System.out.print("\nEnter the University ID of the student: ");
         int studentID = in.nextInt();
         in.nextLine(); // Consume newline
