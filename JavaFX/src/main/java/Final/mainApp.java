@@ -26,6 +26,7 @@ public class mainApp {
         ArrayList<Faculty> faculty = new ArrayList<>();
         ArrayList<Course> courses = new ArrayList<>();
         ArrayList<Department> departments = new ArrayList<>();
+        ArrayList<Schedule> schedules = new ArrayList<>();
         
         // tests /////////////////////////////////////////////
 
@@ -81,7 +82,7 @@ public class mainApp {
             System.out.println("5 - Reports");
             System.out.println("6 - Exit Application");
             System.out.println("===================================");
-            System.out.println("Enter Selection: ");
+            System.out.println("Enter your choice: ");
             menuChoice = in.nextInt();
             
             in.nextLine(); // Consume errant new line character
@@ -104,10 +105,12 @@ public class mainApp {
                     faculty.addAll(newFaculty);
                     break;
                 case 4:
-                    enrollment(students, courses);
+                    Schedule newEnrollments = enrollment(students, courses, currentSemester);
+
+                    schedules.add(newEnrollments);
                     break;
                 case 5:
-                    reports();                        
+                    reports(courses, students, schedules, faculty);                        
                     break;
             }
         } 
@@ -706,21 +709,18 @@ public class mainApp {
     //              Enrollment              //
     //////////////////////////////////////////
 
-    public static void enrollment(ArrayList<Student> students, ArrayList<Course> courses) {
-        // Display available courses
-
-        displayStudentNamesAndIDs(students);
-
-        System.out.println("\nAvailable Courses:");
-        for (Course course : courses) {
-            System.out.println(course);
+    public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, Semester semester) {
+        // Display available students
+        System.out.println("Available Students:");
+        for (Student student : students) {
+            System.out.println(student.getFirstName() + " " + student.getLastName() + " - ID: " + student.getUniversityID());
         }
-        
+    
         // Ask for student ID
         System.out.print("\nEnter student ID to enroll: ");
         int studentID = in.nextInt();
         in.nextLine(); // Consume newline
-        
+    
         // Find student by ID
         Student student = null;
         for (Student s : students) {
@@ -729,39 +729,58 @@ public class mainApp {
                 break;
             }
         }
-        
+    
         if (student == null) {
             System.out.println("Student not found with ID: " + studentID);
-            return;
+            return null; // Return null if student not found
         }
-        
+    
+        // Display available courses
+        System.out.println("\nAvailable Courses:");
+        for (Course course : courses) {
+            System.out.println("=====================");
+            System.out.println("Course ID    : " + course.getCourseID());
+            System.out.println("Course Name  : " + course.getCourseName());
+            System.out.println("Professor    : " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
+            System.out.println("=====================");
+        }
+
         // Ask for the course to enroll in
         System.out.print("\nEnter the course ID to enroll in: ");
-        String courseNumber = in.nextLine();
-        
+        int courseID = in.nextInt();
+        in.nextLine(); // Consume newline
+    
         // Find the selected course
         Course selectedCourse = null;
         for (Course course : courses) {
-            if (course.getCourseID().equals(courseNumber)) {
+            if (course.getCourseID() == (courseID)) {
                 selectedCourse = course;
                 break;
             }
         }
-        
+    
         if (selectedCourse == null) {
-            System.out.println("Course not found: " + courseNumber);
-            return;
+            System.out.println("Course not found with ID: " + courseID);
+            return null; // Return null if course not found
         }
-        
-        // Enroll the student in the course (this is where you add the student to the course enrollment)
+    
+        // Create or update the student's schedule
+        Schedule schedule = new Schedule(student, semester, new ArrayList<>());
+        schedule.addCourse(selectedCourse);
+    
+        // Confirmation message
         System.out.println(student.getFirstName() + " " + student.getLastName() + " successfully enrolled in " + selectedCourse.getCourseName() + "\n");
+    
+        // Return the student's schedule
+        return schedule;
     }
+    
 
     //////////////////////////////////////////
     //              Reports                 //
     //////////////////////////////////////////
 
-    public static void reports() {
+    public static void reports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Schedule> schedules, ArrayList<Faculty> faculty) {
         Scanner in = new Scanner(System.in);
         int choice;
 
@@ -774,26 +793,26 @@ public class mainApp {
             System.out.println("4. Generate Department Report");
             System.out.println("5. Generate Student Schedule Report");
             System.out.println("6. Exit");
-            System.out.print("Enter your choice (1-6): ");
+            System.out.print("Enter your choice: ");
             
             // Get user input for the menu option
-            choice = Integer.parseInt(in.nextLine());
+            choice = in.nextInt();
 
             switch (choice) {
                 case 1:
-                    generateStudentReport();
+                    generateStudentReport(students);
                     break;
                 case 2:
-                    generateFacultyReport();
+                    generateFacultyReport(faculty);
                     break;
                 case 3:
-                    generateCourseReport();
+                    generateCourseReport(courses);
                     break;
                 case 4:
-                    generateDepartmentReport();
+                    generateDepartmentReport(faculty);
                     break;
                 case 5:
-                    generateStudentScheduleReport();
+                    generateStudentScheduleReport(students, schedules);
                     break;
                 case 6:
                     System.out.println("Exiting the report menu.");
@@ -804,70 +823,121 @@ public class mainApp {
         } while (choice != 6);  // Repeat until user exits
     }
 
-    // Method to generate a student schedule report
-    private static void generateStudentScheduleReport(ArrayList<Course> courses, ArrayList<Student> students, <) {
+    public static void generateStudentReport(ArrayList<Student> students) {
+        System.out.println("\n=== Student Report ===");
+        if (students.isEmpty()) {
+            System.out.println("No students available.");
+            return;
+        }
+        for (Student student : students) {
+            System.out.println("Name: " + student.getFirstName() + " " + student.getLastName());
+            System.out.println("University ID: " + student.getUniversityID());
+            System.out.println("Email: " + student.getEmail());
+            System.out.println("GPA: " + student.getGPA());
+            System.out.println("--------------------------");
+        }
+    }
+
+    public static void generateFacultyReport(ArrayList<Faculty> faculty) {
+        System.out.println("\n=== Faculty Report ===");
+        if (faculty.isEmpty()) {
+            System.out.println("No faculty available.");
+            return;
+        }
+        for (Faculty member : faculty) {
+            System.out.println("Name: " + member.getFirstName() + " " + member.getLastName());
+            System.out.println("Department: " + member.getDepartment().getDepartmentName());
+            System.out.println("Office Location: " + member.getOfficeNumber());
+            System.out.println("Email: " + member.getEmail());
+            System.out.println("--------------------------");
+        }
+    }
+
+    public static void generateCourseReport(ArrayList<Course> courses) {
+        System.out.println("\n=== Course Report ===");
+        if (courses.isEmpty()) {
+            System.out.println("No courses available.");
+            return;
+        }
+        for (Course course : courses) {
+            System.out.println("Course ID: " + course.getCourseID());
+            System.out.println("Course Name: " + course.getCourseName());
+            System.out.println("Instructor: " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
+            System.out.println("Schedule: " + course.getDaysOfWeek() + " " + course.getStartTime() + " - " + course.getEndTime());
+            System.out.println("--------------------------");
+        }
+    }
+
+    public static void generateDepartmentReport(ArrayList<Faculty> faculty) {
+        System.out.println("\n=== Department Report ===");
+    
+        // Use ArrayLists to track department names and corresponding faculty members
+        ArrayList<String> departmentNames = new ArrayList<>();
+        ArrayList<ArrayList<String>> facultyByDepartment = new ArrayList<>();
+    
+        // Organize faculty by department
+        for (Faculty member : faculty) {
+            String department = member.getDepartment().getDepartmentName();
+            int index = departmentNames.indexOf(department);
+    
+            if (index == -1) {
+                // New department
+                departmentNames.add(department);
+                ArrayList<String> newFacultyList = new ArrayList<>();
+                newFacultyList.add(member.getFirstName() + " " + member.getLastName());
+                facultyByDepartment.add(newFacultyList);
+            } else {
+                // Existing department
+                facultyByDepartment.get(index).add(member.getFirstName() + " " + member.getLastName());
+            }
+        }
+    
+        // Display the report
+        for (int i = 0; i < departmentNames.size(); i++) {
+            System.out.println("Department: " + departmentNames.get(i));
+            System.out.println("Faculty Members:");
+            for (String facultyMember : facultyByDepartment.get(i)) {
+                System.out.println(" - " + facultyMember);
+            }
+            System.out.println("--------------------------");
+        }
+    }
+    
+    public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules) {
         Scanner in = new Scanner(System.in);
 
-        // Ask the user for the student ID
-        System.out.print("Enter the student ID to generate the schedule report: ");
-        String studentId = in.nextLine();
-
-        // Find the student by ID
+        displayStudentNamesAndIDs(students);
+    
+        System.out.print("\nEnter the University ID of the student: ");
+        int studentID = in.nextInt();
+        in.nextLine(); // Consume newline
+    
         Student selectedStudent = null;
         for (Student student : students) {
-            if (student.getStudentID().equals(studentId)) {
+            if (student.getUniversityID() == studentID) {
                 selectedStudent = student;
                 break;
             }
         }
-
-        if (selectedStudent != null) {
-            System.out.println("=== Schedule Report for " + selectedStudent.getFirstName() + " " + selectedStudent.getLastName() + " ===");
-            // Print the schedule of courses
-            for (Course course : selectedStudent.getCourses()) {
-                System.out.println(course);
+    
+        if (selectedStudent == null) {
+            System.out.println("Student with ID " + studentID + " not found.");
+            return;
+        }
+    
+        // Find the student's schedule
+        for (Schedule schedule : schedules) {
+            if (schedule.getStudent().equals(selectedStudent)) {
+                System.out.println("\n=== Schedule Report ===");
+                System.out.println(schedule);
+                return;
             }
-        } else {
-            System.out.println("Student with ID " + studentId + " not found.");
         }
+    
+        System.out.println("No schedule found for student " + selectedStudent.getFirstName() + " " + selectedStudent.getLastName() + ".");
     }
-
-    // Method to generate a student report
-    private static void generateStudentReport() {
-        System.out.println("=== Student Report ===");
-        // Logic to generate the student report (just printing students for now)
-        for (Student student : students) {
-            System.out.println(student);
-        }
-    }
-
-    // Method to generate a faculty report
-    private static void generateFacultyReport() {
-        System.out.println("=== Faculty Report ===");
-        // Logic to generate the faculty report (just printing faculty for now)
-        for (Faculty facultyMember : facultyList) {
-            System.out.println(facultyMember);
-        }
-    }
-
-    // Method to generate a course report
-    private static void generateCourseReport() {
-        System.out.println("=== Course Report ===");
-        // Logic to generate the course report (just printing courses for now)
-        for (Course course : courses) {
-            System.out.println(course);
-        }
-    }
-
-    // Method to generate a department report (Placeholder)
-    private static void generateDepartmentReport() {
-        System.out.println("=== Department Report ===");
-        // Logic to generate department reports (Placeholder for now)
-    }
-
     
     
-
     /* use for Part 3 
     public static void runDBQuery(String query, char queryType)
     {

@@ -11,7 +11,7 @@ public class Course {
     private String subject;
     private Faculty faculty; // stores a faculty member with the course
 
-    public String courseID;
+    public int  courseID;
     private static int nextID = 1; 
 
     public Course() {
@@ -25,7 +25,7 @@ public class Course {
         this.subject = "N/A";
         this.faculty = new Faculty(); // creates new blank faculty member if the course is blank 
 
-        this.courseID = "" + nextID++;
+        this.courseID = nextID++;
     }
 
     public Course(String coursePrefix, String courseNumber, String daysOfWeek, String startTime, 
@@ -40,11 +40,15 @@ public class Course {
         this.subject = subject;
         this.faculty = faculty;
 
-        this.courseID = "" + nextID++;
+        this.courseID = nextID++;
     }
 
     // getters n setters
-    public String getCourseID(){
+    public Faculty getFaculty(){
+        return faculty;
+    }
+
+    public int getCourseID(){
         return courseID;
     }
 

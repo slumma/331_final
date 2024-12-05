@@ -6,20 +6,27 @@ public class Schedule {
     private Student student;
     private Semester semester;
     private ArrayList<Course> courses;
+    private int studentID;
 
     public Schedule() {
         this.student = new Student();
         this.semester = new Semester();
         this.courses = new ArrayList<>();
+        this.studentID = 0;
     }
 
     public Schedule(Student student, Semester semester, ArrayList<Course> courses) {
         this.student = student;
         this.semester = semester;
         this.courses = courses;
+        this.studentID = student.getUniversityID();
     }
 
     // Getters n Setters
+    public int getStudentID(){
+        return studentID;
+    }
+
     public Student getStudent() {
         return student;
     }
