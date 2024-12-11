@@ -166,6 +166,11 @@ public class Student extends Person {
     public void setEContactZIP(String eContactZIP) {
         this.eContactZIP = eContactZIP;
     }
+    
+    public String getSSN() {
+        return SSN; // Assuming the superclass `Person` has getSSN() implemented
+    }
+
 
     // report of student 
     @Override

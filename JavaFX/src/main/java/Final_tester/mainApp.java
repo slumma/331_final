@@ -10,19 +10,21 @@ Purpose : create an application for a community college that allows a user to cr
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
 
 import oracle.jdbc.pool.OracleDataSource;
 
 public class mainApp {
 
-    // for part 3
     public static OracleDataSource oDS;
     public static Connection jsqlConn;
     public static PreparedStatement jsqlStmt;
     public static ResultSet jsqlResults;
+
     public static Scanner in = new Scanner(System.in);
     
     public static void main(String[] args) {
@@ -178,49 +180,74 @@ public class mainApp {
 
     public static void addStudent(ArrayList<Student> students) {
 
-        // grabs information to use the Student constructor 
-        System.out.print("Enter First Name: ");
-        String firstName = in.nextLine();
-        System.out.print("Enter Last Name: ");
-        String lastName = in.nextLine();
-        System.out.print("Enter Email: ");
-        String email = in.nextLine();
-        System.out.print("Enter SSN: ");
-        String ssn = in.nextLine();
-        System.out.print("Enter GPA: ");
-        double gpa = in.nextDouble();
-        in.nextLine(); // Consume newline
-    
-        // address
-        System.out.print("Enter Home Street: ");
-        String homeStreet = in.nextLine();
-        System.out.print("Enter Home City: ");
-        String homeCity = in.nextLine();
-        System.out.print("Enter Home State: ");
-        String homeState = in.nextLine();
-        System.out.print("Enter Home ZIP: ");
-        String homeZIP = in.nextLine();
-    
-        // emergency contact
-        System.out.print("Enter Emergency Contact Name: ");
-        String eContactName = in.nextLine();
-        System.out.print("Enter Emergency Contact Phone: ");
-        String eContactPhone = in.nextLine();
-        System.out.print("Enter Emergency Contact Street: ");
-        String eContactStreet = in.nextLine();
-        System.out.print("Enter Emergency Contact City: ");
-        String eContactCity = in.nextLine();
-        System.out.print("Enter Emergency Contact State: ");
-        String eContactState = in.nextLine();
-        System.out.print("Enter Emergency Contact ZIP: ");
-        String eContactZIP = in.nextLine();
-    
-        // adds the student to the list that was passed in by the main method 
-        students.add(new Student(firstName, lastName, email, ssn, gpa, homeStreet, homeCity, homeState, homeZIP,
-                eContactName, eContactPhone, eContactStreet, eContactCity, eContactState, eContactZIP));
+        // Create a new student object
+        Student newStudent = new Student();
 
-        // confirmation message 
-        System.out.println("Student added successfully!");
+        // Get user input to populate the student object
+        System.out.println("Please enter new student's first name:");
+        String firstName = in.nextLine();
+
+        System.out.println("Please enter new student's last name:");
+        String lastName = in.nextLine();
+
+        System.out.println("Please enter new student's email address:");
+        String email = in.nextLine();
+
+        System.out.println("Please enter new student's SSN:");
+        String ssn = in.nextLine();
+
+        System.out.println("Please enter new student GPA:");
+        double gpa = in.nextDouble();
+        in.nextLine();  // Consume the newline after nextDouble()
+
+        // Address details
+        System.out.println("Please enter new student's home street address:");
+        String homeStreet = in.nextLine();
+
+        System.out.println("Please enter new student's home city:");
+        String homeCity = in.nextLine();
+
+        System.out.println("Please enter new student's home state:");
+        String homeState = in.nextLine();
+
+        System.out.println("Please enter new student's home ZIP code:");
+        String homeZIP = in.nextLine();
+
+        // Emergency contact details
+        System.out.println("Please enter emergency contact name:");
+        String eContactName = in.nextLine();
+
+        System.out.println("Please enter emergency contact phone:");
+        String eContactPhone = in.nextLine();
+
+        System.out.println("Please enter emergency contact street address:");
+        String eContactStreet = in.nextLine();
+
+        System.out.println("Please enter emergency contact city:");
+        String eContactCity = in.nextLine();
+
+        System.out.println("Please enter emergency contact state:");
+        String eContactState = in.nextLine();
+
+        System.out.println("Please enter emergency contact ZIP code:");
+        String eContactZIP = in.nextLine();
+
+        // Set values for the new Student object using input from the user
+        newStudent = new Student(firstName, lastName, email, ssn, gpa, homeStreet, homeCity, homeState, homeZIP, eContactName, eContactPhone, eContactStreet, eContactCity, eContactState, eContactZIP);
+
+        // Build the SQL query from the student object
+        String sqlQuery = "INSERT INTO STUDENT (STUDENTID, STUDENTNAME, SSN, STUDENTHOMEADDRESS, STUDENTEMAILADDRESS, GPA, "
+                 + "EMERGENCYCONTACTNAME, EMERGENCYCONTACTPHONE, EMERGENCYCONTACTADDRESS) VALUES ("
+                 + newStudent.universityID + ", '" + newStudent.getFirstName() + " " + newStudent.getLastName() + "', '"
+                 + newStudent.getSSN() + "', '" + newStudent.getHomeStreet() + ", " + newStudent.getHomeCity() + ", "
+                 + newStudent.getHomeState() + " " + newStudent.getHomeZIP() + "', '" + newStudent.getEmail() + "', "
+                 + newStudent.getGPA() + ", '" + newStudent.getEContactName() + "', '" + newStudent.getEContactPhone() + "', '"
+                 + newStudent.getEContactStreet() + ", " + newStudent.getEContactCity() + ", " + newStudent.getEContactState() + " "
+                 + newStudent.getEContactZIP() + "')";
+
+
+        // Call runDBQuery to execute the INSERT query
+        runDBQuery(sqlQuery, 'c');
     }
     
     public static void deleteStudent(ArrayList<Student> students) {
@@ -877,18 +904,52 @@ public class mainApp {
 
     // shows all students in database (AKA heap)
     public static void generateStudentReport(ArrayList<Student> students) {
-        System.out.println("\n=== Student Report ===");
-        if (students.isEmpty()) {
-            System.out.println("No students available.");
-            return;
-        }
-        for (Student student : students) {
-            System.out.println("Name: " + student.getFirstName() + " " + student.getLastName());
-            System.out.println("University ID: " + student.getUniversityID());
-            System.out.println("Email: " + student.getEmail());
-            System.out.println("GPA: " + student.getGPA());
-            System.out.println("--------------------------");
-        }
+            System.out.println("\n=== Student Report ===");
+
+            if (students.isEmpty()) {
+                System.out.println("No students available.");
+                return;
+            }
+            
+            // gets all students
+            String query = "SELECT * FROM STUDENT";
+            
+            // executes query 
+            runDBQuery(query, 'r');
+
+            // copied from runDBquery but its catered to returning specificly students.
+            try {
+                if (jsqlResults != null) {
+                    while (jsqlResults.next()) {
+                        int studentId = jsqlResults.getInt("STUDENTID");
+                        String studentName = jsqlResults.getString("STUDENTNAME");
+                        String ssn = jsqlResults.getString("SSN");
+                        String homeAddress = jsqlResults.getString("STUDENTHOMEADDRESS");
+                        String email = jsqlResults.getString("STUDENTEMAILADDRESS");
+                        double gpa = jsqlResults.getDouble("GPA");
+                        String emergencyContactName = jsqlResults.getString("EMERGENCYCONTACTNAME");
+                        String emergencyContactPhone = jsqlResults.getString("EMERGENCYCONTACTPHONE");
+                        String emergencyContactAddress = jsqlResults.getString("EMERGENCYCONTACTADDRESS");
+
+                        // Print student data in the desired format
+                        System.out.println("=====================");
+                        System.out.println(studentName + " (" + studentId + ")");
+                        System.out.println("SSN: " + ssn);
+                        System.out.println("Home Address: " + homeAddress);
+                        System.out.println("Email: " + email);
+                        System.out.println("GPA: " + gpa);
+                        System.out.println("Emergency Contact Name: " + emergencyContactName);
+                        System.out.println("Emergency Contact Phone: " + emergencyContactPhone);
+                        System.out.println("Emergency Contact Address: " + emergencyContactAddress);
+                        System.out.println("=====================");
+                        System.out.println(); // Adds a blank line between each student's information
+                    }
+                } else {
+                    System.out.println("No results returned.");
+                }
+            } catch (SQLException sqlex) {
+                System.out.println("Error processing results: " + sqlex.toString());
+            }
     }
 
     // shows all fac members in heap
@@ -978,7 +1039,7 @@ public class mainApp {
     }
     
     
-    /* use for Part 3 
+     
     public static void runDBQuery(String query, char queryType)
     {
         // queryType - Using the C.R.U.D. acronym
@@ -1009,7 +1070,7 @@ public class mainApp {
         {
             System.out.println(sqlex.toString());
         }
-    } */
+    }
     
     
 }
