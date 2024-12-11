@@ -53,8 +53,7 @@ public class testers {
 
                     // Print student data in the desired format
                     System.out.println("==========");
-                    System.out.println("Student (" + studentId + ")");
-                    System.out.println("Name: " + studentName);
+                    System.out.println(studentName + " (" + studentId + ")");
                     System.out.println("SSN: " + ssn);
                     System.out.println("Home Address: " + homeAddress);
                     System.out.println("Email: " + email);
