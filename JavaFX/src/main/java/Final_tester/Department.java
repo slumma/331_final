@@ -13,20 +13,25 @@ public class Department {
 
     private String departmentName;  // arrayList to store the department name
     private ArrayList<Faculty> members;  // arrayList to hold the faculty members
+    public int departmentID;
+    private static int nextID = 1;
 
     public Department(String departmentName) {
         this.departmentName = departmentName;
         this.members = new ArrayList<>();
+        this.departmentID = nextID++;
+    }
+    
+    public Department(String name, int id){
+        this.departmentName = name;
+        this.departmentID = id;
+        this.members = new ArrayList<>();
     }
 
     // method to add a faculty member to the department
-    public void addFaculty(Faculty faculty) {
-        // check if the faculty member is already in the department ==> same logic from schedule 
-        if (members.contains(faculty)) {
-            System.out.println("Error: Faculty member " + faculty.getFirstName() + " " + faculty.getLastName() + " is already in the department.");
-        } else {
-            members.add(faculty);
-            System.out.println("Faculty member " + faculty.getFirstName() + " " + faculty.getLastName() + " added successfully.");
+    public void addFaculty(Faculty newFaculty) {
+        if (newFaculty != null && !members.contains(newFaculty)) {
+            members.add(newFaculty);
         }
     }
 
@@ -35,7 +40,7 @@ public class Department {
         // Check if the faculty member is in the department
         if (members.contains(faculty)) {
             members.remove(faculty);
-            System.out.println("Faculty member " + faculty.getFirstName() + " " + faculty.getLastName() + " removed successfully.");
+            System.out.println("Faculty member " + faculty.getName() + " removed successfully.");
         } else {
             System.out.println("Error: Faculty member " + faculty.getFirstName() + " " + faculty.getLastName() + " not found in the department.");
         }
@@ -48,6 +53,14 @@ public class Department {
 
      public List<Faculty> getFacultyMembers() {
         return members;
+    }
+     
+    public int getDepartmentID(){
+        return departmentID;
+    }
+    
+    public void setDepartmentID(int id){
+        this.departmentID = id;
     }
 
     // Method to return a string representation of the Department

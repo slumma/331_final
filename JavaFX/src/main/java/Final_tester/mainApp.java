@@ -6,7 +6,14 @@ CIS 331
 Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
 */
 
-//import java.lang.classfile.ClassFile;  --> error saying its a preview API (?)
+/*
+Note to self (to-do):
+    - need to add, edit, delete for faculty members --> probably will be the toughest one
+    - need to set up enrollment using the db
+    - finish up the reports (student and cours already done)
+    - test for errors
+*/
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,11 +39,13 @@ public class mainApp {
         Semester currentSemester = new Semester("Fall", 2024, 15); // current semester irl
 
         // Initialize a list to hold student objects
-        ArrayList<Student> students = loadStudentsFromDatabase(); 
-        ArrayList<Faculty> faculty = new ArrayList<>();
-        ArrayList<Course> courses = new ArrayList<>();
-        ArrayList<Department> departments = new ArrayList<>();
+        ArrayList<Student> students = loadStudentsFromDatabase();  // made a method that loads up the students from the db into the arrayList
+        
+        ArrayList<Course> courses = loadCoursesFromDatabase();
+        ArrayList<Department> departments = loadDepartmentsFromDatabase();
         ArrayList<Schedule> schedules = new ArrayList<>();
+        
+        ArrayList<Faculty> faculty = loadFacultyFromDatabase(departments);
         
 
 
@@ -221,8 +230,7 @@ public class mainApp {
 
     }
 
-    // edits student info
-        public static void editStudent(ArrayList<Student> students) {
+    public static void editStudent(ArrayList<Student> students) {
         if (students.isEmpty()) {
             System.out.println("No students available to edit.");
             return;
@@ -250,46 +258,46 @@ public class mainApp {
             System.out.println("Editing details for student with University ID: " + universityID);
 
             // Edit the student's details
-            System.out.print("Enter new name (current: " + studentToEdit.getName() + "): ");
+            System.out.print("Enter new name: ");
             String newName = in.nextLine();
             if (!newName.isEmpty()) {
                 studentToEdit.setName(newName);
             }
 
-            System.out.print("Enter new email address (current: " + studentToEdit.getEmail() + "): ");
+            System.out.print("Enter new email address: ");
             String newEmail = in.nextLine();
             if (!newEmail.isEmpty()) {
                 studentToEdit.setEmail(newEmail);
             }
 
-            System.out.print("Enter new GPA (current: " + studentToEdit.getGPA() + "): ");
+            System.out.print("Enter new GPA: ");
             double newGPA = in.nextDouble();
             studentToEdit.setGPA(newGPA);
 
             // Edit the student address
             in.nextLine(); // Consume the newline after nextDouble()
-            System.out.print("Enter new home street address (current: " + studentToEdit.getHomeStreet() + "): ");
+            System.out.print("Enter new home street address: ");
             String newHomeStreet = in.nextLine();
             if (!newHomeStreet.isEmpty()) {
                 studentToEdit.setHomeStreet(newHomeStreet);
                 studentToEdit.updateHomeAddress();
             }
 
-            System.out.print("Enter new home city (current: " + studentToEdit.getHomeCity() + "): ");
+            System.out.print("Enter new home city: ");
             String newHomeCity = in.nextLine();
             if (!newHomeCity.isEmpty()) {
                 studentToEdit.setHomeCity(newHomeCity);
                 studentToEdit.updateHomeAddress();
             }
 
-            System.out.print("Enter new home state (current: " + studentToEdit.getHomeState() + "): ");
+            System.out.print("Enter new home state: ");
             String newHomeState = in.nextLine();
             if (!newHomeState.isEmpty()) {
                 studentToEdit.setHomeState(newHomeState);
                 studentToEdit.updateHomeAddress();
             }
 
-            System.out.print("Enter new home ZIP code (current: " + studentToEdit.getHomeZIP() + "): ");
+            System.out.print("Enter new home ZIP code: ");
             String newHomeZIP = in.nextLine();
             if (!newHomeZIP.isEmpty()) {
                 studentToEdit.setHomeZIP(newHomeZIP);
@@ -297,41 +305,41 @@ public class mainApp {
             }
 
             // Edit the student's emergency contact information
-            System.out.print("Enter new emergency contact name (current: " + studentToEdit.getEContactName() + "): ");
+            System.out.print("Enter new emergency contact name: ");
             String newEContactName = in.nextLine();
             if (!newEContactName.isEmpty()) {
                 studentToEdit.setEContactName(newEContactName);
             }
 
-            System.out.print("Enter new emergency contact phone (current: " + studentToEdit.getEContactPhone() + "): ");
+            System.out.print("Enter new emergency contact phone: ");
             String newEContactPhone = in.nextLine();
             if (!newEContactPhone.isEmpty()) {
                 studentToEdit.setEContactPhone(newEContactPhone);
                 
             }
 
-            System.out.print("Enter new emergency contact street (current: " + studentToEdit.getEContactStreet() + "): ");
+            System.out.print("Enter new emergency contact street: ");
             String newEContactStreet = in.nextLine();
             if (!newEContactStreet.isEmpty()) {
                 studentToEdit.setEContactStreet(newEContactStreet);
                 studentToEdit.updateEContactAddress();
             }
 
-            System.out.print("Enter new emergency contact city (current: " + studentToEdit.getEContactCity() + "): ");
+            System.out.print("Enter new emergency contact city: ");
             String newEContactCity = in.nextLine();
             if (!newEContactCity.isEmpty()) {
                 studentToEdit.setEContactCity(newEContactCity);
                 studentToEdit.updateEContactAddress();
             }
 
-            System.out.print("Enter new emergency contact state (current: " + studentToEdit.getEContactState() + "): ");
+            System.out.print("Enter new emergency contact state: ");
             String newEContactState = in.nextLine();
             if (!newEContactState.isEmpty()) {
                 studentToEdit.setEContactState(newEContactState);
                 studentToEdit.updateEContactAddress();
             }
 
-            System.out.print("Enter new emergency contact ZIP (current: " + studentToEdit.getEContactZIP() + "): ");
+            System.out.print("Enter new emergency contact ZIP: ");
             String newEContactZIP = in.nextLine();
             if (!newEContactZIP.isEmpty()) {
                 studentToEdit.setEContactZIP(newEContactZIP);
@@ -359,11 +367,9 @@ public class mainApp {
 
     }
 
-
-    
     // method so that dont have to write this code over and over to print all students 
     public static void displayStudentNamesAndIDs(ArrayList<Student> students) {
-        generateStudentReport(students);
+        generateStudentReport(students); // im lazy i know
     }
     
     //////////////////////////////////////////
@@ -402,7 +408,7 @@ public class mainApp {
                     editCourse(courses);
                     break;
                 case 4:
-                    viewCourses(courses);
+                    generateCourseReport(courses);
                     break;
                 case 5:
                     System.out.println("Returning to the main menu...\n");
@@ -417,118 +423,175 @@ public class mainApp {
     
     public static void addCourse(ArrayList<Course> courses) {
         System.out.println("\n=== Add a New Course ===");
-    
+
+        // Get user input to populate the course object
         System.out.print("Enter course prefix (e.g., CSC): ");
         String prefix = in.nextLine();
-    
+
         System.out.print("Enter course number: ");
         String number = in.nextLine();
-    
+
         System.out.print("Enter course days (e.g., Mon/Wed/Fri): ");
         String days = in.nextLine();
-    
+
         System.out.print("Enter start time (e.g., 9:00 AM): ");
         String startTime = in.nextLine();
-    
+
         System.out.print("Enter end time (e.g., 10:00 AM): ");
         String endTime = in.nextLine();
-    
+
         System.out.print("Enter credit hours: ");
-        String creditHours = in.nextLine();
-    
+        int creditHours = in.nextInt();
+        in.nextLine();
+
         System.out.print("Enter subject: ");
         String subject = in.nextLine();
-    
-        Faculty faculty = new Faculty(); // assumes a new faculty member is assigned for simplicity, satisfy faculty requirement
-    
-        courses.add(new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty));
+
+        Faculty faculty = new Faculty();
+
+        // Create the new course object with the provided information
+        Course newCourse = new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty);
+
+        // Build the SQL query from the course object
+        String sqlQuery = "INSERT INTO COURSE (COURSEID, COURSEPREFIX, COURSENUMBER, COURSENAME, DAYSOFWEEK, STARTTIME, ENDTIME, CREDITHOURS, SUBJECT) VALUES ('"
+                + newCourse.getCourseID() + "', '" + newCourse.getCoursePrefix() + "', '" + newCourse.getCourseNumber() + "', '" + newCourse.getCourseName() + "', '"
+                + newCourse.getDaysOfWeek() + "', '" + newCourse.getStartTime() + "', '" + newCourse.getEndTime() + "', "
+                + newCourse.getCreditHours() + ", '" + newCourse.getSubject() + "')";
+
+        // Call runDBQuery to execute the INSERT query
+        runDBQuery(sqlQuery, 'c');
+
+        // Add the new course to the list of courses
+        courses.add(newCourse);
         System.out.println("Course added successfully!");
     }
+
     
     public static void deleteCourse(ArrayList<Course> courses) {
-        System.out.println("\n=== Delete a Course ===");
-        if (courses.isEmpty()) {
+        if (courses.isEmpty()) { // If the course list is empty, print error and return to the sub-menu
             System.out.println("No courses available to delete.");
             return;
         }
-    
-        System.out.print("Enter course number to delete: ");
-        String courseNumber = in.nextLine();
-    
-        boolean found = false;
-        for (Course course : courses) {
-            if (courseNumber.equals(course.getCourseNumber())) {
-                courses.remove(course);
-                System.out.println("Course removed successfully!");
-                found = true;
-                break;
-            }
-        }
-    
-        if (!found) {
-            System.out.println("Course not found.");
-        }
+
+        // Display all courses that can be deleted
+        generateCourseReport(courses);
+
+        // Ask for the courseID of the course to delete
+        System.out.print("Enter the Course ID of the course to delete: ");
+        int courseID = in.nextInt();
+
+        // SQL query to delete the course with the given ID
+        String query = "DELETE FROM COURSE WHERE COURSEID = " + courseID;
+
+        // Call runDBQuery to execute the DELETE query
+        runDBQuery(query, 'd'); // 'd' for DELETE query
+
+        System.out.println("Course with ID " + courseID + " has been deleted.");
     }
+
     
     public static void editCourse(ArrayList<Course> courses) {
         System.out.println("\n=== Edit a Course ===");
+
         if (courses.isEmpty()) {
             System.out.println("No courses available to edit.");
             return;
         }
 
-        viewCourses(courses);
-    
-        System.out.print("Enter course number to edit: ");
-        String courseNumber = in.nextLine();
-    
+        // show all courses that can be edited
+        generateCourseReport(courses);
+
+        // ask for the course number of the course to edit
+        System.out.print("Enter the ID of the course to edit: ");
+        int courseID = in.nextInt();
+        in.nextLine();
+
+        // find the course with the matching course number
+        Course courseToEdit = null;
         for (Course course : courses) {
-            if (courseNumber.equals(course.getCourseNumber())) {
-                System.out.println("Editing course: " + course.getCourseName());
-    
-                System.out.print("Enter new days of week: ");
-                String days = in.nextLine();
-                course.setDaysOfWeek(days);
-    
-                System.out.print("Enter new start time: ");
-                String startTime = in.nextLine();
-                course.setStartTime(startTime);
-    
-                System.out.print("Enter new end time: ");
-                String endTime = in.nextLine();
-                course.setEndTime(endTime);
-    
-                System.out.print("Enter new credit hours: ");
-                String creditHours = in.nextLine();
-                course.setCreditHours(creditHours);
-    
-                System.out.print("Enter new subject: ");
-                String subject = in.nextLine();
-                course.setSubject(subject);
-    
-                System.out.println("Course updated successfully!");
-                return;
+            if (courseID == course.getCourseID()) {
+                courseToEdit = course;
+                break;
             }
         }
-    
-        System.out.println("Course not found.");
+
+        // if course found, edit its details
+        if (courseToEdit != null) {
+            System.out.println("Editing course: " + courseToEdit.getCourseName());
+
+            // Edit the course's details
+            System.out.print("Enter new course prefix (current: " + courseToEdit.getCoursePrefix() + "): ");
+            String newCoursePrefix = in.nextLine();
+            if (!newCoursePrefix.isEmpty()) {
+                courseToEdit.setCoursePrefix(newCoursePrefix);
+            }
+
+            // Option to edit course number
+            System.out.print("Enter new course number (current: " + courseToEdit.getCourseNumber() + "): ");
+            String newCourseNumber = in.nextLine();
+            if (!newCourseNumber.isEmpty()) {
+                courseToEdit.setCourseNumber(newCourseNumber);
+            }
+            
+            System.out.print("Enter new course name: ");
+            String newCourseName = in.nextLine();
+            if (!newCourseName.isEmpty()) {
+                courseToEdit.setCourseName(newCourseName);
+            }
+
+            System.out.print("Enter new days of the week: ");
+            String newDays = in.nextLine();
+            if (!newDays.isEmpty()) {
+                courseToEdit.setDaysOfWeek(newDays);
+            }
+
+            System.out.print("Enter new start time: ");
+            String newStartTime = in.nextLine();
+            if (!newStartTime.isEmpty()) {
+                courseToEdit.setStartTime(newStartTime);
+            }
+
+            System.out.print("Enter new end time: ");
+            String newEndTime = in.nextLine();
+            if (!newEndTime.isEmpty()) {
+                courseToEdit.setEndTime(newEndTime);
+            }
+
+            System.out.print("Enter new credit hours: ");
+            int newCreditHours = in.nextInt();
+            in.nextLine(); // Consume the newline character
+            courseToEdit.setCreditHours(newCreditHours);
+
+            System.out.print("Enter new subject: ");
+            String newSubject = in.nextLine();
+            if (!newSubject.isEmpty()) {
+                courseToEdit.setSubject(newSubject);
+            }
+
+            // Construct the SQL query to update the course details
+            String sqlQuery = "UPDATE COURSE SET "
+                    + "COURSEPREFIX = '" + courseToEdit.getCoursePrefix() + "', "
+                    + "COURSENUMBER = '" + courseToEdit.getCourseNumber() + "', "
+                    + "COURSENAME = '" + courseToEdit.getCourseName() + "', "
+                    + "DAYSOFWEEK = '" + courseToEdit.getDaysOfWeek() + "', "
+                    + "STARTTIME = '" + courseToEdit.getStartTime() + "', "
+                    + "ENDTIME = '" + courseToEdit.getEndTime() + "', "
+                    + "CREDITHOURS = " + courseToEdit.getCreditHours() + ", "
+                    + "SUBJECT = '" + courseToEdit.getSubject() + "' "
+                    + "WHERE COURSEID = '" + courseToEdit.getCourseID() + "'";
+
+            // Execute the SQL query to update the course details in the database
+            runDBQuery(sqlQuery, 'u'); // 'u' for UPDATE query
+
+            System.out.println("Course details updated successfully!");
+        } else {
+            System.out.println("Course not found.");
+        }
     }
+
     
     public static void viewCourses(ArrayList<Course> courses) {
-        System.out.println("\n=== All Courses ===");
-        if (courses.isEmpty()) {
-            System.out.println("No courses available.");
-            return;
-        }
-    
-        for (Course course : courses) {
-            System.out.println("=======================");
-            System.out.println("Course ID     : " + course.getCourseID());
-            System.out.println("Course Name   : " + course.getCourseName());
-            System.out.println("Subject       : " + course.getSubject());
-            System.out.println("Faculty       : " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
-            System.out.println("=======================");
-        }
+        generateCourseReport(courses);
         
     }
     
@@ -601,8 +664,8 @@ public class mainApp {
         String phoneNumber = in.nextLine();
         System.out.print("Enter Position: ");
         String rank = in.nextLine();
-    
-        // check if department already exists
+
+        // Check if the department already exists
         Department department = null;
         for (Department dept : departments) {
             if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
@@ -610,28 +673,47 @@ public class mainApp {
                 break;
             }
         }
-    
-        // if department is not found, create it
+
+        // If department is not found, create it
         if (department == null) {
             System.out.println("Department not found: " + departmentName);
-            // create new department and add to list
+            // Create new department and add to the list
             department = new Department(departmentName);
-            departments.add(department); // adds the new department to the list
+            departments.add(department); // Adds the new department to the list
+            
+            String insertDeptQuery = "INSERT INTO DEPARTMENT (DEPARTMENTID, DEPARTMENTNAME) VALUES (" + department.getDepartmentID() + ", '" + department.getDepartmentName() + "')";
+            runDBQuery(insertDeptQuery, 'c');
+            
             System.out.println("New department created: " + departmentName);
         }
-    
-        // create the new faculty member and assign it to the department
+
+        // Create the new faculty member object
         Faculty newFaculty = new Faculty(firstName, lastName, email, ssn, department, officeBuilding, officeNumber, phoneNumber, rank);
-        facultyList.add(newFaculty); // adds the faculty member to the faculty list
-    
+        facultyList.add(newFaculty); // Adds the faculty member to the faculty list
+
         // Add the new faculty member to the department's faculty list
         department.addFaculty(newFaculty); // Ensure Department has an addFaculty method
-    
+
+        // Insert the new faculty member into the database
+        String sqlQuery = "INSERT INTO FACULTY (FACULTYID, FACULTYNAME, FACULTYEMAILADDRESS, DEPARTMENTID, BUILDINGNAME, OFFICENUMBER, FACULTYPHONENUMBER, POSITION) "
+                + "VALUES (" + newFaculty.getUniversityID() + ", '"+ newFaculty.getFirstName() + " " + newFaculty.getLastName() + "', '"
+                + newFaculty.getEmail() + "', (SELECT DEPARTMENTID FROM DEPARTMENT WHERE DEPARTMENTNAME = '" + departmentName + "'), '"
+                + newFaculty.getOfficeNumber() + "', '" + newFaculty.getOfficeNumber() + "', '" + newFaculty.getPhoneNumber() + "', '"
+                + newFaculty.getRank() + "')";
+
+        // Call runDBQuery to execute the INSERT query
+        runDBQuery(sqlQuery, 'c');
+
         System.out.println("Faculty member added successfully to the " + departmentName + " department!");
     }
+
     
     public static void deleteFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Delete Faculty Member ===");
+        
+
+        generateFacultyReport();
+        
         System.out.print("Enter Faculty University ID to Delete: ");
         int universityID = in.nextInt();
         in.nextLine(); // Consume newline
@@ -645,12 +727,18 @@ public class mainApp {
         }
 
         if (facultyToRemove != null) {
+            // Delete from database
+            String deleteQuery = "DELETE FROM FACULTY WHERE FACULTYID = " + universityID;
+            runDBQuery(deleteQuery, 'c');  // Assuming 'c' is for executing queries that modify the database
+
+            // Remove from facultyList
             facultyList.remove(facultyToRemove);
-            System.out.println("Faculty member removed successfully!");
+            System.out.println("Faculty member removed successfully from the database.");
         } else {
             System.out.println("No faculty member found with that ID.");
         }
     }
+
 
     public static void editFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Edit Faculty Member ===");
@@ -825,13 +913,13 @@ public class mainApp {
                     generateStudentReport(students);
                     break;
                 case 2:
-                    generateFacultyReport(faculty);
+                    generateFacultyReport();
                     break;
                 case 3:
                     generateCourseReport(courses);
                     break;
                 case 4:
-                    generateDepartmentReport(departments);
+                    generateDepartmentReport();
                     break;
                 case 5:
                     generateStudentScheduleReport(students, schedules);
@@ -896,54 +984,181 @@ public class mainApp {
     }
 
     // shows all fac members in heap
-    public static void generateFacultyReport(ArrayList<Faculty> faculty) {
+    public static void generateFacultyReport() {
         System.out.println("\n=== Faculty Report ===");
-        if (faculty.isEmpty()) {
-            System.out.println("No faculty available.");
-            return;
-        }
-        for (Faculty member : faculty) {
-            System.out.println("Name: " + member.getFirstName() + " " + member.getLastName());
-            System.out.println("Department: " + member.getDepartment().getDepartmentName());
-            System.out.println("Office Location: " + member.getOfficeNumber());
-            System.out.println("Email: " + member.getEmail());
-            System.out.println("--------------------------");
+
+        // Query to fetch all faculty members with their details
+        String query = "SELECT F.FACULTYID, F.FACULTYNAME, F.FACULTYEMAILADDRESS, D.DEPARTMENTNAME, F.OFFICENUMBER "
+                     + "FROM FACULTY F "
+                     + "JOIN DEPARTMENT D ON F.DEPARTMENTID = D.DEPARTMENTID";  // Assuming FACULTY table has a foreign key to DEPARTMENT table
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            if (!resultSet.next()) {
+                System.out.println("No faculty available.");
+                return;
+            }
+
+            // Process the result set and display faculty details
+            do {
+                int facultyID = resultSet.getInt("FACULTYID");
+                String facultyName = resultSet.getString("FACULTYNAME");
+                String facultyEmail = resultSet.getString("FACULTYEMAILADDRESS");
+                String departmentName = resultSet.getString("DEPARTMENTNAME");
+                String officeNumber = resultSet.getString("OFFICENUMBER");
+
+                // Print the faculty details
+                System.out.println("Name: " + facultyName + " (" + facultyID + ")" );
+                System.out.println("Department: " + departmentName);
+                System.out.println("Office Location: " + officeNumber);
+                System.out.println("Email: " + facultyEmail);
+                System.out.println("--------------------------");
+
+            } while (resultSet.next());
+
+        } catch (SQLException e) {
+            System.out.println("Error processing results: " + e.toString());
         }
     }
+
 
     // shows all courses 
     public static void generateCourseReport(ArrayList<Course> courses) {
         System.out.println("\n=== Course Report ===");
+
         if (courses.isEmpty()) {
             System.out.println("No courses available.");
             return;
         }
-        for (Course course : courses) {
-            System.out.println("Course ID: " + course.getCourseID());
-            System.out.println("Course Name: " + course.getCourseName());
-            System.out.println("Instructor: " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
-            System.out.println("Schedule: " + course.getDaysOfWeek() + " " + course.getStartTime() + " - " + course.getEndTime());
-            System.out.println("--------------------------");
+
+        // Query to fetch all courses
+        String query = "SELECT * FROM COURSE";
+
+        // Executes the query
+        runDBQuery(query, 'r');
+
+        // Same logic as the previous method, but catered to returning course data
+        try {
+            if (jsqlResults != null) {
+                while (jsqlResults.next()) {
+                    int courseID = jsqlResults.getInt("COURSEID");
+                    String coursePrefix = jsqlResults.getString("COURSEPREFIX");
+                    String courseNumber = jsqlResults.getString("COURSENUMBER");
+                    String courseName = jsqlResults.getString("COURSENAME");
+                    String daysOfWeek = jsqlResults.getString("DAYSOFWEEK");
+                    String startTime = jsqlResults.getString("STARTTIME");
+                    String endTime = jsqlResults.getString("ENDTIME");
+                    int creditHours = jsqlResults.getInt("CREDITHOURS");
+                    String subject = jsqlResults.getString("SUBJECT");
+
+                    // Print course data in the desired format
+                    System.out.println("=====================");
+                    System.out.println(coursePrefix + " " + courseNumber + " (" + courseID + ")");
+                    System.out.println("Course Name: " + courseName);
+                    System.out.println("Days of the Week: " + daysOfWeek);
+                    System.out.println("Start Time: " + startTime);
+                    System.out.println("End Time: " + endTime);
+                    System.out.println("Credit Hours: " + creditHours);
+                    System.out.println("Subject: " + subject);
+                    System.out.println("=====================");
+                    System.out.println(); // Adds a blank line between each course's information
+                }
+            } else {
+                System.out.println("No results returned.");
+            }
+        } catch (SQLException sqlex) {
+            System.out.println("Error processing results: " + sqlex.toString());
         }
     }
 
-    // shows all members in each department
-    public static void generateDepartmentReport(ArrayList<Department> departments) {
+    
+    // this method almost killed me. 
+    // had to do a lot of research (and some working with AI) to get it working.
+    // the members were previously being duplicated across every department
+    // not anymore
+    public static void generateDepartmentReport() {
         System.out.println("\n=== Department Report ===");
-        for (Department department : departments) {
-            System.out.println("Department: " + department.getDepartmentName());
-            System.out.println("Faculty Members:");
-            List<Faculty> facultyList = department.getFacultyMembers(); // gets list from department cdf
-            if (facultyList.isEmpty()) { // if empty print error message 
-                System.out.println(" - No faculty members.");
-            } else {
-                for (Faculty faculty : facultyList) { // prints name of each member in specific department
-                    System.out.println(" - " + faculty.getFirstName() + " " + faculty.getLastName() + " (" + faculty.getUniversityID() + ")");
+
+        // all departments and their faculty
+        String query = "SELECT D.DEPARTMENTID, D.DEPARTMENTNAME, F.FACULTYID, F.FACULTYNAME, F.FACULTYEMAILADDRESS "
+                     + "FROM DEPARTMENT D "
+                     + "LEFT JOIN FACULTY F ON D.DEPARTMENTID = F.DEPARTMENTID";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Variables to hold current department being processed
+            String currentDepartment = "";
+            List<Faculty> facultyList = new ArrayList<>();  // List to store faculty for each department
+
+            // Process the result set
+            while (resultSet.next()) {
+                String departmentName = resultSet.getString("DEPARTMENTNAME");
+                String facultyName = resultSet.getString("FACULTYNAME");
+                String facultyEmail = resultSet.getString("FACULTYEMAILADDRESS");
+
+                // If department name changes, print the department header and faculty list
+                if (!departmentName.equals(currentDepartment)) {
+                    // Print previous department's faculty if it's not the first one
+                    if (!facultyList.isEmpty()) {
+                        System.out.println("Faculty Members:");
+                        for (Faculty faculty : facultyList) {
+                            System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + ")");
+                        }
+                    }
+
+                    // Print the new department header
+                    if (!departmentName.equals(currentDepartment)) {
+                        if (!facultyList.isEmpty()) {
+                            System.out.println("--------------------------");
+                        }
+                        currentDepartment = departmentName;
+                        facultyList.clear();  // Clear faculty list for the new department
+
+                        // Print department header
+                        System.out.println("Department: " + departmentName);
+                    }
+                }
+
+                // If faculty is found, create Faculty object and add to the list
+                if (facultyName != null) {
+                    Faculty faculty = new Faculty(facultyName, facultyEmail);
+                    facultyList.add(faculty);
                 }
             }
+
+            if (!facultyList.isEmpty()) {
+                System.out.println("Faculty Members:");
+                for (Faculty faculty : facultyList) {
+                    System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + "), ID: " + faculty.getUniversityID());
+                }
+            }
+
             System.out.println("--------------------------");
+            System.out.println();
+
+        } catch (SQLException e) {
+            System.out.println("Error processing results: " + e.toString());
         }
     }
+
 
     // shows a schedule for specific student 
     public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules) {
@@ -981,6 +1196,20 @@ public class mainApp {
         System.out.println("No schedule found for student " + selectedStudent.getFirstName() + " " + selectedStudent.getLastName() + ".");
     }
     
+    
+    
+    // NEWLY ADDED PART 3 METHODS --> 
+    // WHY??:
+    //  - i wanted to be able to have data in the database be the same as data in the heap
+    //  - kinda hard to do but i think it makes the program run better - especially for modifications & deletions 
+    // how??: 
+    //  - created a method for each arrayList that was in part2
+    //  - queried the db for all occurences from the respective table
+    //  - created a new object for each record
+    //      - didnt work at first so i had to modify the constructors of the CDFs to allow an inputted ID 
+    //      - also had to check if it already existed (primarily for department) so thta there werent duplicates
+    //  - populate the arrayList tht was passed into method 
+    //  - pray that it didnt destroy everything
     
      
     public static void runDBQuery(String query, char queryType)
@@ -1028,11 +1257,10 @@ public class mainApp {
             oDS.setURL(URL);
             jsqlConn = oDS.getConnection(user, pass);
 
-            // Prepare and execute the query
             PreparedStatement stmt = jsqlConn.prepareStatement(query);
             ResultSet resultSet = stmt.executeQuery();
 
-            // Iterate through the result set and create Student objects
+            //  set and create Student objects
             while (resultSet.next()) {
                 int studentID = resultSet.getInt("studentID");
                 String studentName = resultSet.getString("studentName");
@@ -1044,22 +1272,157 @@ public class mainApp {
                 String emergencyContactPhone = resultSet.getString("emergencyContactPhone");
                 String emergencyContactAddress = resultSet.getString("emergencyContactAddress");
 
-                // Create a new Student object
+                // create a new Student object
                 Student student = new Student(studentID, studentName, email, gpa, homeAddress, emergencyContactName, emergencyContactPhone, emergencyContactAddress, ssn);
 
-                // Add to the ArrayList
+                // add the newly created student to the ArrayList
                 students.add(student);
             }
-
-            // Close resources
-            resultSet.close();
-            stmt.close();
-            jsqlConn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
         }
 
         return students;
     }
+    
+    public static ArrayList<Course> loadCoursesFromDatabase() {
+        ArrayList<Course> courses = new ArrayList<>();
+        String query = "SELECT * FROM Course";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // create and set course objects 
+            while (resultSet.next()) {
+                int courseID = resultSet.getInt("courseID");
+                String coursePrefix = resultSet.getString("coursePrefix");
+                String courseNumber = resultSet.getString("courseNumber");
+                String courseName = resultSet.getString("courseName");
+                String daysOfWeek = resultSet.getString("daysOfWeek");
+                String startTime = resultSet.getString("startTime");
+                String endTime = resultSet.getString("endTime");
+                int creditHours = resultSet.getInt("creditHours");
+                String subject = resultSet.getString("subject");
+
+                Faculty faculty = new Faculty(); 
+
+                Course course = new Course(courseID, coursePrefix, courseNumber, courseName, daysOfWeek, startTime, endTime, creditHours, subject, faculty);
+
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        return courses;
+    }
+
+    public static ArrayList<Department> loadDepartmentsFromDatabase() {
+        ArrayList<Department> departments = new ArrayList<>();
+        String query = "SELECT * FROM DEPARTMENT";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // create and set department objects from results
+            while (resultSet.next()) {
+                int departmentID = resultSet.getInt("departmentID");
+                String departmentName = resultSet.getString("departmentName");
+
+                // check if the department already exists
+                boolean exists = false;
+                for (Department dept : departments) {
+                    if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                // if the department does not exist --> create and add it to the list
+                if (!exists) {
+                    Department department = new Department(departmentName);
+                    departments.add(department);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        return departments;
+    }
+
+    
+    public static ArrayList<Faculty> loadFacultyFromDatabase(ArrayList<Department> departments) {
+        ArrayList<Faculty> facultyList = new ArrayList<>();
+        String query = "SELECT * FROM FACULTY";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Create and set Faculty objects based on query results
+            while (resultSet.next()) {
+                int facultyID = resultSet.getInt("facultyID");
+                String name = resultSet.getString("facultyName");
+                String email = resultSet.getString("facultyEmailAddress");
+                String departmentName = resultSet.getString("departmentID");
+                String officeBuilding = resultSet.getString("buildingName");
+                String officeNumber = resultSet.getString("officeNumber");
+                String phoneNumber = resultSet.getString("facultyPhoneNumber");
+                String rank = resultSet.getString("position");
+
+                // find or create the department
+                Department department = null;
+                for (Department dept : departments) {
+                    if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
+                        department = dept;
+                        break;
+                    }
+                }
+
+                // if department is not found --> create it and add it to the departments list
+                if (department == null) {
+                    department = new Department(departmentName);
+                    departments.add(department);
+                }
+
+                // create a new Faculty object
+                Faculty faculty = new Faculty(facultyID, name, email, department, officeBuilding, officeNumber, phoneNumber, rank);
+
+                // add the faculty to the department and faculty list
+                department.addFaculty(faculty);
+                facultyList.add(faculty);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        return facultyList;
+    }
+
+    
     
 }

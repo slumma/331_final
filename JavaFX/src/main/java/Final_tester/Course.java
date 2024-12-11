@@ -9,11 +9,12 @@ Purpose : create an application for a community college that allows a user to cr
 public class Course {
     private String coursePrefix;
     private String courseNumber;
+    private String coursePreNum = coursePrefix + " " + courseNumber;
     private String courseName;
     private String daysOfWeek;
     private String startTime;
     private String endTime;
-    private String creditHours;
+    private int creditHours;
     private String subject;
     private Faculty faculty; // stores a faculty member with the course
 
@@ -27,7 +28,7 @@ public class Course {
         this.daysOfWeek = "N/A";
         this.startTime = "N/A";
         this.endTime = "N/A";
-        this.creditHours = "0";
+        this.creditHours = 0;
         this.subject = "N/A";
         this.faculty = new Faculty(); // creates new blank faculty member if the course is blank 
 
@@ -35,7 +36,7 @@ public class Course {
     }
 
     public Course(String coursePrefix, String courseNumber, String daysOfWeek, String startTime, 
-                  String endTime, String creditHours, String subject, Faculty faculty) {
+                  String endTime, int creditHours, String subject, Faculty faculty) {
         this.coursePrefix = coursePrefix;
         this.courseNumber = courseNumber;
         this.courseName = coursePrefix + courseNumber; // Concatenate prefix and number to form the course name
@@ -47,6 +48,19 @@ public class Course {
         this.faculty = faculty;
 
         this.courseID = nextID++;
+    }
+    
+    public Course(int courseID, String coursePrefix, String courseNumber, String courseName, String daysOfWeek, String startTime, String endTime, int creditHours, String subject, Faculty faculty){
+        this.courseID = courseID;
+        this.coursePrefix = coursePrefix;
+        this.courseNumber = courseNumber;
+        this.courseName = coursePrefix + courseNumber; // Concatenate prefix and number to form the course name
+        this.daysOfWeek = daysOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.creditHours = creditHours;
+        this.subject = subject;
+        this.faculty = faculty;
     }
 
     // getters n setters
@@ -64,7 +78,10 @@ public class Course {
 
     public void setCoursePrefix(String coursePrefix) {
         this.coursePrefix = coursePrefix;
+        this.coursePreNum = coursePrefix + this.courseNumber; // sets it to updated name
+
     }
+   
 
     public String getCourseNumber() {
         return courseNumber;
@@ -72,6 +89,8 @@ public class Course {
 
     public void setCourseNumber(String courseNumber) {
         this.courseNumber = courseNumber;
+        this.coursePreNum = this.coursePrefix + courseNumber; 
+
     }
 
     public String getCourseName() {
@@ -106,11 +125,11 @@ public class Course {
         this.endTime = endTime;
     }
 
-    public String getCreditHours() {
+    public int getCreditHours() {
         return creditHours;
     }
 
-    public void setCreditHours(String creditHours) {
+    public void setCreditHours(int creditHours) {
         this.creditHours = creditHours;
     }
 
