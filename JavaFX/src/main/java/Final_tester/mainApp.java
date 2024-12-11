@@ -367,8 +367,6 @@ public class mainApp {
 
     }
 
-
-    
     // method so that dont have to write this code over and over to print all students 
     public static void displayStudentNamesAndIDs(ArrayList<Student> students) {
         generateStudentReport(students); // im lazy i know
@@ -712,6 +710,10 @@ public class mainApp {
     
     public static void deleteFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Delete Faculty Member ===");
+        
+
+        generateFacultyReport();
+        
         System.out.print("Enter Faculty University ID to Delete: ");
         int universityID = in.nextInt();
         in.nextLine(); // Consume newline
@@ -725,12 +727,18 @@ public class mainApp {
         }
 
         if (facultyToRemove != null) {
+            // Delete from database
+            String deleteQuery = "DELETE FROM FACULTY WHERE FACULTYID = " + universityID;
+            runDBQuery(deleteQuery, 'c');  // Assuming 'c' is for executing queries that modify the database
+
+            // Remove from facultyList
             facultyList.remove(facultyToRemove);
-            System.out.println("Faculty member removed successfully!");
+            System.out.println("Faculty member removed successfully from the database.");
         } else {
             System.out.println("No faculty member found with that ID.");
         }
     }
+
 
     public static void editFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Edit Faculty Member ===");
@@ -905,7 +913,7 @@ public class mainApp {
                     generateStudentReport(students);
                     break;
                 case 2:
-                    generateFacultyReport(faculty);
+                    generateFacultyReport();
                     break;
                 case 3:
                     generateCourseReport(courses);
@@ -976,20 +984,52 @@ public class mainApp {
     }
 
     // shows all fac members in heap
-    public static void generateFacultyReport(ArrayList<Faculty> faculty) {
+    public static void generateFacultyReport() {
         System.out.println("\n=== Faculty Report ===");
-        if (faculty.isEmpty()) {
-            System.out.println("No faculty available.");
-            return;
-        }
-        for (Faculty member : faculty) {
-            System.out.println("Name: " + member.getName());
-            System.out.println("Department: " + member.getDepartment().getDepartmentName());
-            System.out.println("Office Location: " + member.getOfficeNumber());
-            System.out.println("Email: " + member.getEmail());
-            System.out.println("--------------------------");
+
+        // Query to fetch all faculty members with their details
+        String query = "SELECT F.FACULTYID, F.FACULTYNAME, F.FACULTYEMAILADDRESS, D.DEPARTMENTNAME, F.OFFICENUMBER "
+                     + "FROM FACULTY F "
+                     + "JOIN DEPARTMENT D ON F.DEPARTMENTID = D.DEPARTMENTID";  // Assuming FACULTY table has a foreign key to DEPARTMENT table
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            if (!resultSet.next()) {
+                System.out.println("No faculty available.");
+                return;
+            }
+
+            // Process the result set and display faculty details
+            do {
+                int facultyID = resultSet.getInt("FACULTYID");
+                String facultyName = resultSet.getString("FACULTYNAME");
+                String facultyEmail = resultSet.getString("FACULTYEMAILADDRESS");
+                String departmentName = resultSet.getString("DEPARTMENTNAME");
+                String officeNumber = resultSet.getString("OFFICENUMBER");
+
+                // Print the faculty details
+                System.out.println("Name: " + facultyName + " (" + facultyID + ")" );
+                System.out.println("Department: " + departmentName);
+                System.out.println("Office Location: " + officeNumber);
+                System.out.println("Email: " + facultyEmail);
+                System.out.println("--------------------------");
+
+            } while (resultSet.next());
+
+        } catch (SQLException e) {
+            System.out.println("Error processing results: " + e.toString());
         }
     }
+
 
     // shows all courses 
     public static void generateCourseReport(ArrayList<Course> courses) {
@@ -1040,13 +1080,18 @@ public class mainApp {
         }
     }
 
+    
+    // this method almost killed me. 
+    // had to do a lot of research (and some working with AI) to get it working.
+    // the members were previously being duplicated across every department
+    // not anymore
     public static void generateDepartmentReport() {
         System.out.println("\n=== Department Report ===");
 
-        // Query to fetch all departments and their faculty
+        // all departments and their faculty
         String query = "SELECT D.DEPARTMENTID, D.DEPARTMENTNAME, F.FACULTYID, F.FACULTYNAME, F.FACULTYEMAILADDRESS "
                      + "FROM DEPARTMENT D "
-                     + "LEFT JOIN FACULTY F ON D.DEPARTMENTID = F.DEPARTMENTID";  // Assuming DEPARTMENTID in both tables
+                     + "LEFT JOIN FACULTY F ON D.DEPARTMENTID = F.DEPARTMENTID";
 
         try {
             String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
@@ -1099,11 +1144,10 @@ public class mainApp {
                 }
             }
 
-            // After finishing the loop, ensure the last department's faculty is printed
             if (!facultyList.isEmpty()) {
                 System.out.println("Faculty Members:");
                 for (Faculty faculty : facultyList) {
-                    System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + ")");
+                    System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + "), ID: " + faculty.getUniversityID());
                 }
             }
 
