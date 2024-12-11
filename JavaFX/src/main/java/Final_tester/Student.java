@@ -19,6 +19,8 @@ public class Student extends Person {
     private String homeState;
     private String homeZIP;
     
+    private String address = homeStreet + ", " + homeCity + ", " + homeState + ", " + homeZIP;
+    
     // emergency contact 
     private String eContactName;
     private String eContactPhone;
@@ -26,6 +28,8 @@ public class Student extends Person {
     private String eContactCity;
     private String eContactState;
     private String eContactZIP;
+    
+    private String eAddress = eContactStreet + ", " + eContactCity + ", " + eContactState + ", " + eContactZIP;
     
     public Student(){
         super();
@@ -62,6 +66,23 @@ public class Student extends Person {
         this.eContactZIP = eContactZIP;
     }
     
+    // to be read in from db
+    public Student(int studentID, String name, String email, double gpa,
+                   String homeAddress, String emergencyContactName, String emergencyContactPhone,
+                   String emergencyContactAddress, String ssn) {
+        
+        this.universityID = studentID;
+        this.name = name;
+        this.emailAddress = email;
+        this.setGPA(gpa);
+        this.address = homeAddress;
+        this.eContactName = emergencyContactName;
+        this.eContactPhone = emergencyContactPhone;
+        this.eAddress = emergencyContactAddress;
+        this.SSN = ssn;
+    }
+
+    
     // setter
     public void setGPA(double g){
         Scanner scanner = new Scanner(System.in);
@@ -91,33 +112,19 @@ public class Student extends Person {
         return homeStreet;
     }
 
-    public void setHomeStreet(String homeStreet) {
-        this.homeStreet = homeStreet;
-    }
 
     public String getHomeCity() {
         return homeCity;
-    }
-
-    public void setHomeCity(String homeCity) {
-        this.homeCity = homeCity;
     }
 
     public String getHomeState() {
         return homeState;
     }
 
-    public void setHomeState(String homeState) {
-        this.homeState = homeState;
-    }
-
     public String getHomeZIP() {
         return homeZIP;
     }
 
-    public void setHomeZIP(String homeZIP) {
-        this.homeZIP = homeZIP;
-    }
 
     public String getEContactName() {
         return eContactName;
@@ -139,38 +146,86 @@ public class Student extends Person {
         return eContactStreet;
     }
 
-    public void setEContactStreet(String eContactStreet) {
-        this.eContactStreet = eContactStreet;
-    }
-
     public String getEContactCity() {
         return eContactCity;
     }
 
-    public void setEContactCity(String eContactCity) {
-        this.eContactCity = eContactCity;
-    }
 
     public String getEContactState() {
         return eContactState;
     }
 
-    public void setEContactState(String eContactState) {
-        this.eContactState = eContactState;
-    }
 
     public String getEContactZIP() {
         return eContactZIP;
     }
 
-    public void setEContactZIP(String eContactZIP) {
-        this.eContactZIP = eContactZIP;
+
+    public String getSSN() {
+        return SSN; 
     }
     
-    public String getSSN() {
-        return SSN; // Assuming the superclass `Person` has getSSN() implemented
+    public String getAddress(){
+        return address;
+    }
+    
+    public String getEmAddress(){
+        return eAddress;
+    }
+    
+    public void setHomeStreet(String homeStreet) {
+    this.homeStreet = homeStreet;
+    updateHomeAddress();
     }
 
+    public void setHomeCity(String homeCity) {
+        this.homeCity = homeCity;
+        updateHomeAddress();
+    }
+
+    public void setHomeState(String homeState) {
+        this.homeState = homeState;
+        updateHomeAddress();
+    }
+
+    public void setHomeZIP(String homeZIP) {
+        this.homeZIP = homeZIP;
+        updateHomeAddress();
+    }
+
+    
+
+    public void setEContactStreet(String eContactStreet) {
+        this.eContactStreet = eContactStreet;
+        updateEContactAddress();
+    }
+
+    public void setEContactCity(String eContactCity) {
+        this.eContactCity = eContactCity;
+        updateEContactAddress();
+    }
+
+    public void setEContactState(String eContactState) {
+        this.eContactState = eContactState;
+        updateEContactAddress();
+    }
+
+    public void setEContactZIP(String eContactZIP) {
+        this.eContactZIP = eContactZIP;
+        updateEContactAddress();
+    }
+
+
+    
+    
+    // fixes the issue of the database not being updated FINALLY FOUND IT
+    public void updateEContactAddress() {
+    this.eAddress = eContactStreet + ", " + eContactCity + ", " + eContactState + " " + eContactZIP;
+}
+
+    public void updateHomeAddress() {
+        this.address = homeStreet + ", " + homeCity + ", " + homeState + " " + homeZIP;
+    }
 
     // report of student 
     @Override

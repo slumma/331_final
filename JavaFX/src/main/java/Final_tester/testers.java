@@ -85,6 +85,22 @@ public class testers {
         runDBQuery(query, 'r'); // 'r' for SELECT query
     }
     
+    public static void deleteStudent() {
+    // Ask for the student ID to delete
+    System.out.println("Please enter the Student ID to delete:");
+    int studentId = keyboardIn.nextInt();
+    keyboardIn.nextLine(); // Consume the newline character
+
+    // SQL query to delete the student with the given ID
+    String query = "DELETE FROM STUDENT WHERE STUDENTID = " + studentId;
+
+    // Call runDBQuery to execute the DELETE query
+    runDBQuery(query, 'd'); // 'd' for DELETE query
+
+    System.out.println("Student with ID " + studentId + " has been deleted.");
+}
+
+    
     public static void newStudent() {
         // Create a new student object
         Student newStudent = new Student();

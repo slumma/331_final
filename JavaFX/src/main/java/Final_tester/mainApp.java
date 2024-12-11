@@ -14,12 +14,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-
 import oracle.jdbc.pool.OracleDataSource;
 
 public class mainApp {
-
+    
     public static OracleDataSource oDS;
     public static Connection jsqlConn;
     public static PreparedStatement jsqlStmt;
@@ -33,64 +31,14 @@ public class mainApp {
         int menuChoice = 0;
         Semester currentSemester = new Semester("Fall", 2024, 15); // current semester irl
 
-        // initalize lists that will hold pretty much everything 
-        ArrayList<Student> students = new ArrayList<>();
+        // Initialize a list to hold student objects
+        ArrayList<Student> students = loadStudentsFromDatabase(); 
         ArrayList<Faculty> faculty = new ArrayList<>();
         ArrayList<Course> courses = new ArrayList<>();
         ArrayList<Department> departments = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
         
-        /////////////// testing values - DELETE IF NEEDED /////////////////////////////////////////////
 
-        // create some departments
-        departments.add(new Department("Computer Information Systems"));
-        departments.add(new Department("Computer Science"));
-        departments.add(new Department("Systems Thinking"));
-
-        // initialize faculty members and add them to departments and faculty list
-        Faculty faculty1 = new Faculty("Jeremy", "Ezell", "jeremy@example.com", "123-45-6789", 
-                        departments.get(0), "College of Business", "5522", "555-1234", "Professor");
-        faculty.add(faculty1);
-        departments.get(0).addFaculty(faculty1); 
-
-        Faculty faculty2 = new Faculty("Dymtro", "Babik", "babik@example.com", "987-65-4321", 
-                        departments.get(1), "Showker", "1102", "555-5678", "Associate Professor");
-        faculty.add(faculty2);
-        departments.get(1).addFaculty(faculty2); 
-
-        Faculty faculty3 = new Faculty("Sean", "Lough", "seanLough@example.com", "111-11-1111", 
-                        departments.get(2), "Hartman Hall", "2021", "555-8765", "Professor");
-        faculty.add(faculty3); 
-        departments.get(2).addFaculty(faculty3); 
-
-        // create courses
-        courses.add(new Course("CIS", "221", "Mon, Wed, Fri", "9:00 AM", "10:00 AM", "3", "Introduction to Computer Science", faculty.get(2)));
-        courses.add(new Course("CIS", "331", "Mon, Wed, Fri", "11:00 AM", "12:00 PM", "3", "Advanced Programming", faculty.get(0)));
-        courses.add(new Course("COB", "304", "Tue, Thu", "10:00 AM", "11:30 AM", "4", "Enterprise Architecture", faculty.get(1)));
-
-        // mock Students 
-        students.add(new Student("John", "Doe", "john.doe@example.com", "123-45-6789", 3.7, 
-                "123 Elm St", "Hometown", "VA", "12345", "Mary Doe", "555-1111", 
-                "456 Oak St", "Hometown", "VA", "12345"));
-
-        students.add(new Student("Jane", "Smith", "jane.smith@example.com", "987-65-4321", 3.9, 
-                "789 Pine St", "Cityville", "NY", "67890", "John Smith", "555-2222", 
-                "123 Maple St", "Cityville", "NY", "67890"));
-
-        students.add(new Student("Bob", "Johnson", "bob.johnson@example.com", "111-11-1111", 2.8, 
-                "321 Birch St", "Smalltown", "CA", "11223", "Alice Johnson", "555-3333", 
-                "654 Cedar St", "Smalltown", "CA", "11223"));
-
-        students.add(new Student("Alice", "Williams", "alice.williams@example.com", "222-22-2222", 3.5, 
-                "654 Oak St", "Bigcity", "TX", "44556", "Robert Williams", "555-4444", 
-                "123 Pine St", "Bigcity", "TX", "44556"));
-
-        students.add(new Student("Eve", "Brown", "eve.brown@example.com", "333-33-3333", 4.0, 
-                "987 Maple St", "Metropolis", "IL", "77889", "Linda Brown", "555-5555", 
-                "987 Elm St", "Metropolis", "IL", "77889"));
-
-        
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         // main menu -- functions as long as user doesnt choose exit 
@@ -134,7 +82,7 @@ public class mainApp {
     
     //////////////////////////////////////////
     //                                      //
-    //          course management           //
+    //          student management          //
     //                                      //
     //////////////////////////////////////////
     
@@ -180,10 +128,10 @@ public class mainApp {
 
     public static void addStudent(ArrayList<Student> students) {
 
-        // Create a new student object
+        // create a new student object
         Student newStudent = new Student();
 
-        // Get user input to populate the student object
+        // get user input to populate the student object
         System.out.println("Please enter new student's first name:");
         String firstName = in.nextLine();
 
@@ -200,7 +148,6 @@ public class mainApp {
         double gpa = in.nextDouble();
         in.nextLine();  // Consume the newline after nextDouble()
 
-        // Address details
         System.out.println("Please enter new student's home street address:");
         String homeStreet = in.nextLine();
 
@@ -246,7 +193,7 @@ public class mainApp {
                  + newStudent.getEContactZIP() + "')";
 
 
-        // Call runDBQuery to execute the INSERT query
+        // call runDBQuery to execute the INSERT query
         runDBQuery(sqlQuery, 'c');
     }
     
@@ -262,42 +209,34 @@ public class mainApp {
         // ask for the universityID of the student to delete
         System.out.print("Enter the University ID of the student to delete: ");
         int universityID = in.nextInt();
-        
-        // find the student with the matching University ID, set it as target student 
-        Student studentToRemove = null;
-        for (Student student : students) {
-            if (student.getUniversityID() == universityID) {
-                studentToRemove = student;
-                break;
-            }
-        }
-    
-        // ff student is found, remove them
-        if (studentToRemove != null) {
-            students.remove(studentToRemove);
-            System.out.println("Student with University ID " + universityID + " has been deleted.");
-        } else {
-            System.out.println("No student found with University ID " + universityID + ".");
-        }
+
+        // SQL query to delete the student with the given ID
+        String query = "DELETE FROM STUDENT WHERE STUDENTID = " + universityID;
+
+        // Call runDBQuery to execute the DELETE query
+        runDBQuery(query, 'd'); // 'd' for DELETE query
+
+    System.out.println("Student with ID " + universityID + " has been deleted.");
+
+
     }
 
     // edits student info
-    public static void editStudent(ArrayList<Student> students) {
+        public static void editStudent(ArrayList<Student> students) {
         if (students.isEmpty()) {
             System.out.println("No students available to edit.");
             return;
         }
-        
 
-        // shows all students that can be edited 
+        // Show all students that can be edited
         displayStudentNamesAndIDs(students);
 
-        // ask for the universityID of the student to edit
+        // Ask for the universityID of the student to edit
         System.out.print("Enter the University ID of the student to edit: ");
         int universityID = in.nextInt();
         in.nextLine(); // Consume the newline character
-    
-        // find the student with the matching universityID
+
+        // Find the student with the matching universityID
         Student studentToEdit = null;
         for (Student student : students) {
             if (student.getUniversityID() == universityID) {
@@ -305,122 +244,126 @@ public class mainApp {
                 break;
             }
         }
-    
-        // ff student found, edit their details
-        if (studentToEdit != null) {
 
-            // IF USER DOES NOT ENTER ANYTHING (HITS ENTER) IT KEEPS SAME INFO
+        // If student found, edit their details
+        if (studentToEdit != null) {
             System.out.println("Editing details for student with University ID: " + universityID);
-    
-            // edit the student's details
-            System.out.print("Enter new first name (current: " + studentToEdit.getFirstName() + "): ");
-            String newFirstName = in.nextLine();
-            if (!newFirstName.isEmpty()) {
-                studentToEdit.setFirstName(newFirstName);
+
+            // Edit the student's details
+            System.out.print("Enter new name (current: " + studentToEdit.getName() + "): ");
+            String newName = in.nextLine();
+            if (!newName.isEmpty()) {
+                studentToEdit.setName(newName);
             }
-    
-            System.out.print("Enter new last name (current: " + studentToEdit.getLastName() + "): ");
-            String newLastName = in.nextLine();
-            if (!newLastName.isEmpty()) {
-                studentToEdit.setLastName(newLastName);
-            }
-    
+
             System.out.print("Enter new email address (current: " + studentToEdit.getEmail() + "): ");
             String newEmail = in.nextLine();
             if (!newEmail.isEmpty()) {
                 studentToEdit.setEmail(newEmail);
             }
-    
+
             System.out.print("Enter new GPA (current: " + studentToEdit.getGPA() + "): ");
             double newGPA = in.nextDouble();
             studentToEdit.setGPA(newGPA);
-    
-            // edit the student address
-            in.nextLine(); 
+
+            // Edit the student address
+            in.nextLine(); // Consume the newline after nextDouble()
             System.out.print("Enter new home street address (current: " + studentToEdit.getHomeStreet() + "): ");
             String newHomeStreet = in.nextLine();
             if (!newHomeStreet.isEmpty()) {
                 studentToEdit.setHomeStreet(newHomeStreet);
+                studentToEdit.updateHomeAddress();
             }
-    
+
             System.out.print("Enter new home city (current: " + studentToEdit.getHomeCity() + "): ");
             String newHomeCity = in.nextLine();
             if (!newHomeCity.isEmpty()) {
                 studentToEdit.setHomeCity(newHomeCity);
+                studentToEdit.updateHomeAddress();
             }
-    
+
             System.out.print("Enter new home state (current: " + studentToEdit.getHomeState() + "): ");
             String newHomeState = in.nextLine();
             if (!newHomeState.isEmpty()) {
                 studentToEdit.setHomeState(newHomeState);
+                studentToEdit.updateHomeAddress();
             }
-    
+
             System.out.print("Enter new home ZIP code (current: " + studentToEdit.getHomeZIP() + "): ");
             String newHomeZIP = in.nextLine();
             if (!newHomeZIP.isEmpty()) {
                 studentToEdit.setHomeZIP(newHomeZIP);
+                studentToEdit.updateHomeAddress();
             }
-    
-            // edit the student's emergency contact information
+
+            // Edit the student's emergency contact information
             System.out.print("Enter new emergency contact name (current: " + studentToEdit.getEContactName() + "): ");
             String newEContactName = in.nextLine();
             if (!newEContactName.isEmpty()) {
                 studentToEdit.setEContactName(newEContactName);
             }
-    
+
             System.out.print("Enter new emergency contact phone (current: " + studentToEdit.getEContactPhone() + "): ");
             String newEContactPhone = in.nextLine();
             if (!newEContactPhone.isEmpty()) {
                 studentToEdit.setEContactPhone(newEContactPhone);
+                
             }
-    
+
             System.out.print("Enter new emergency contact street (current: " + studentToEdit.getEContactStreet() + "): ");
             String newEContactStreet = in.nextLine();
             if (!newEContactStreet.isEmpty()) {
                 studentToEdit.setEContactStreet(newEContactStreet);
+                studentToEdit.updateEContactAddress();
             }
-    
+
             System.out.print("Enter new emergency contact city (current: " + studentToEdit.getEContactCity() + "): ");
             String newEContactCity = in.nextLine();
             if (!newEContactCity.isEmpty()) {
                 studentToEdit.setEContactCity(newEContactCity);
+                studentToEdit.updateEContactAddress();
             }
-    
+
             System.out.print("Enter new emergency contact state (current: " + studentToEdit.getEContactState() + "): ");
             String newEContactState = in.nextLine();
             if (!newEContactState.isEmpty()) {
                 studentToEdit.setEContactState(newEContactState);
+                studentToEdit.updateEContactAddress();
             }
-    
+
             System.out.print("Enter new emergency contact ZIP (current: " + studentToEdit.getEContactZIP() + "): ");
             String newEContactZIP = in.nextLine();
             if (!newEContactZIP.isEmpty()) {
                 studentToEdit.setEContactZIP(newEContactZIP);
+                studentToEdit.updateEContactAddress();
             }
-    
+
+            // Construct the SQL query
+            String sqlQuery = "UPDATE STUDENT SET "
+                    + "STUDENTNAME = '" + studentToEdit.getName() + "', "
+                    + "STUDENTEMAILADDRESS = '" + studentToEdit.getEmail() + "', "
+                    + "GPA = " + studentToEdit.getGPA() + ", "
+                    + "STUDENTHOMEADDRESS = '" + studentToEdit.getAddress() + "', "
+                    + "EMERGENCYCONTACTNAME = '" + studentToEdit.getEContactName() + "', "
+                    + "EMERGENCYCONTACTPHONE = '" + studentToEdit.getEContactPhone() + "', "
+                    + "EMERGENCYCONTACTADDRESS = '" + studentToEdit.getEmAddress() + "' "
+                    + "WHERE STUDENTID = " + studentToEdit.getUniversityID();
+
+            // Execute the SQL query to update the student's details
+            runDBQuery(sqlQuery, 'u'); // 'u' for UPDATE query
+
             System.out.println("Student details updated successfully.");
         } else {
             System.out.println("No student found with University ID " + universityID + ".");
         }
+
     }
+
+
     
     // method so that dont have to write this code over and over to print all students 
     public static void displayStudentNamesAndIDs(ArrayList<Student> students) {
-        // check if the list is empty
-        if (students.isEmpty()) {
-            System.out.println("No students to display.");
-            return; // exits method
-        }
-        
-        // iterate over the list of students and print their name and ID
-        System.out.println("===== Student List =====");
-        for (Student student : students) {
-            System.out.println("=====================");
-            System.out.println("Name   : " + student.getFirstName() + " " + student.getLastName());
-            System.out.println("ID     : " + student.getUniversityID());
-            System.out.println("=====================");
-        }
-        System.out.println("=======================");
+        generateStudentReport(students);
     }
     
     //////////////////////////////////////////
@@ -1072,5 +1015,51 @@ public class mainApp {
         }
     }
     
+    
+    public static ArrayList<Student> loadStudentsFromDatabase() {
+        ArrayList<Student> students = new ArrayList<>();
+        String query = "SELECT * FROM Student";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            // Prepare and execute the query
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Iterate through the result set and create Student objects
+            while (resultSet.next()) {
+                int studentID = resultSet.getInt("studentID");
+                String studentName = resultSet.getString("studentName");
+                String ssn = resultSet.getString("SSN");
+                String homeAddress = resultSet.getString("studentHomeAddress");
+                String email = resultSet.getString("studentEmailAddress");
+                double gpa = resultSet.getDouble("GPA");
+                String emergencyContactName = resultSet.getString("emergencyContactName");
+                String emergencyContactPhone = resultSet.getString("emergencyContactPhone");
+                String emergencyContactAddress = resultSet.getString("emergencyContactAddress");
+
+                // Create a new Student object
+                Student student = new Student(studentID, studentName, email, gpa, homeAddress, emergencyContactName, emergencyContactPhone, emergencyContactAddress, ssn);
+
+                // Add to the ArrayList
+                students.add(student);
+            }
+
+            // Close resources
+            resultSet.close();
+            stmt.close();
+            jsqlConn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
     
 }

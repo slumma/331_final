@@ -12,6 +12,9 @@ public class Person {
     // general info about person -- will be used for both students and professors
     public String firstName;
     public String lastName;
+    
+    public String name = firstName + lastName;
+    
     protected String emailAddress;
     protected String SSN;
     public int universityID;
@@ -106,6 +109,14 @@ public class Person {
 
     public String getEmail(){
         return emailAddress;
+    }
+    
+    public String getName(){
+        return name;
+    }
+    
+    public void setName(String s){
+        this.name = s;
     }
 
 }
