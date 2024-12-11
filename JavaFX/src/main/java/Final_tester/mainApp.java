@@ -6,6 +6,14 @@ CIS 331
 Purpose : create an application for a community college that allows a user to create/alter/delete university accounts and generate reports for specific members.
 */
 
+/*
+Note to self (to-do):
+    - need to add, edit, delete for faculty members --> probably will be the toughest one
+    - need to set up enrollment using the db
+    - finish up the reports (student and cours already done)
+    - test for errors
+*/
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,10 +40,12 @@ public class mainApp {
 
         // Initialize a list to hold student objects
         ArrayList<Student> students = loadStudentsFromDatabase();  // made a method that loads up the students from the db into the arrayList
-        ArrayList<Faculty> faculty = new ArrayList<>();
+        
         ArrayList<Course> courses = loadCoursesFromDatabase();
-        ArrayList<Department> departments = new ArrayList<>();
+        ArrayList<Department> departments = loadDepartmentsFromDatabase();
         ArrayList<Schedule> schedules = new ArrayList<>();
+        
+        ArrayList<Faculty> faculty = loadFacultyFromDatabase(departments);
         
 
 
@@ -220,7 +230,6 @@ public class mainApp {
 
     }
 
-    // edits student info
     public static void editStudent(ArrayList<Student> students) {
         if (students.isEmpty()) {
             System.out.println("No students available to edit.");
@@ -415,49 +424,49 @@ public class mainApp {
     }
     
     public static void addCourse(ArrayList<Course> courses) {
-    System.out.println("\n=== Add a New Course ===");
+        System.out.println("\n=== Add a New Course ===");
 
-    // Get user input to populate the course object
-    System.out.print("Enter course prefix (e.g., CSC): ");
-    String prefix = in.nextLine();
+        // Get user input to populate the course object
+        System.out.print("Enter course prefix (e.g., CSC): ");
+        String prefix = in.nextLine();
 
-    System.out.print("Enter course number: ");
-    String number = in.nextLine();
+        System.out.print("Enter course number: ");
+        String number = in.nextLine();
 
-    System.out.print("Enter course days (e.g., Mon/Wed/Fri): ");
-    String days = in.nextLine();
+        System.out.print("Enter course days (e.g., Mon/Wed/Fri): ");
+        String days = in.nextLine();
 
-    System.out.print("Enter start time (e.g., 9:00 AM): ");
-    String startTime = in.nextLine();
+        System.out.print("Enter start time (e.g., 9:00 AM): ");
+        String startTime = in.nextLine();
 
-    System.out.print("Enter end time (e.g., 10:00 AM): ");
-    String endTime = in.nextLine();
+        System.out.print("Enter end time (e.g., 10:00 AM): ");
+        String endTime = in.nextLine();
 
-    System.out.print("Enter credit hours: ");
-    int creditHours = in.nextInt();
-    in.nextLine();
+        System.out.print("Enter credit hours: ");
+        int creditHours = in.nextInt();
+        in.nextLine();
 
-    System.out.print("Enter subject: ");
-    String subject = in.nextLine();
+        System.out.print("Enter subject: ");
+        String subject = in.nextLine();
 
-    Faculty faculty = new Faculty();
+        Faculty faculty = new Faculty();
 
-    // Create the new course object with the provided information
-    Course newCourse = new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty);
+        // Create the new course object with the provided information
+        Course newCourse = new Course(prefix, number, days, startTime, endTime, creditHours, subject, faculty);
 
-    // Build the SQL query from the course object
-    String sqlQuery = "INSERT INTO COURSE (COURSEID, COURSEPREFIX, COURSENUMBER, COURSENAME, DAYSOFWEEK, STARTTIME, ENDTIME, CREDITHOURS, SUBJECT) VALUES ('"
-            + newCourse.getCourseID() + "', '" + newCourse.getCoursePrefix() + "', '" + newCourse.getCourseNumber() + "', '" + newCourse.getCourseName() + "', '"
-            + newCourse.getDaysOfWeek() + "', '" + newCourse.getStartTime() + "', '" + newCourse.getEndTime() + "', "
-            + newCourse.getCreditHours() + ", '" + newCourse.getSubject() + "')";
+        // Build the SQL query from the course object
+        String sqlQuery = "INSERT INTO COURSE (COURSEID, COURSEPREFIX, COURSENUMBER, COURSENAME, DAYSOFWEEK, STARTTIME, ENDTIME, CREDITHOURS, SUBJECT) VALUES ('"
+                + newCourse.getCourseID() + "', '" + newCourse.getCoursePrefix() + "', '" + newCourse.getCourseNumber() + "', '" + newCourse.getCourseName() + "', '"
+                + newCourse.getDaysOfWeek() + "', '" + newCourse.getStartTime() + "', '" + newCourse.getEndTime() + "', "
+                + newCourse.getCreditHours() + ", '" + newCourse.getSubject() + "')";
 
-    // Call runDBQuery to execute the INSERT query
-    runDBQuery(sqlQuery, 'c');
-    
-    // Add the new course to the list of courses
-    courses.add(newCourse);
-    System.out.println("Course added successfully!");
-}
+        // Call runDBQuery to execute the INSERT query
+        runDBQuery(sqlQuery, 'c');
+
+        // Add the new course to the list of courses
+        courses.add(newCourse);
+        System.out.println("Course added successfully!");
+    }
 
     
     public static void deleteCourse(ArrayList<Course> courses) {
@@ -657,8 +666,8 @@ public class mainApp {
         String phoneNumber = in.nextLine();
         System.out.print("Enter Position: ");
         String rank = in.nextLine();
-    
-        // check if department already exists
+
+        // Check if the department already exists
         Department department = null;
         for (Department dept : departments) {
             if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
@@ -666,25 +675,40 @@ public class mainApp {
                 break;
             }
         }
-    
-        // if department is not found, create it
+
+        // If department is not found, create it
         if (department == null) {
             System.out.println("Department not found: " + departmentName);
-            // create new department and add to list
+            // Create new department and add to the list
             department = new Department(departmentName);
-            departments.add(department); // adds the new department to the list
+            departments.add(department); // Adds the new department to the list
+            
+            String insertDeptQuery = "INSERT INTO DEPARTMENT (DEPARTMENTID, DEPARTMENTNAME) VALUES (" + department.getDepartmentID() + ", '" + department.getDepartmentName() + "')";
+            runDBQuery(insertDeptQuery, 'c');
+            
             System.out.println("New department created: " + departmentName);
         }
-    
-        // create the new faculty member and assign it to the department
+
+        // Create the new faculty member object
         Faculty newFaculty = new Faculty(firstName, lastName, email, ssn, department, officeBuilding, officeNumber, phoneNumber, rank);
-        facultyList.add(newFaculty); // adds the faculty member to the faculty list
-    
+        facultyList.add(newFaculty); // Adds the faculty member to the faculty list
+
         // Add the new faculty member to the department's faculty list
         department.addFaculty(newFaculty); // Ensure Department has an addFaculty method
-    
+
+        // Insert the new faculty member into the database
+        String sqlQuery = "INSERT INTO FACULTY (FACULTYID, FACULTYNAME, FACULTYEMAILADDRESS, DEPARTMENTID, BUILDINGNAME, OFFICENUMBER, FACULTYPHONENUMBER, POSITION) "
+                + "VALUES (" + newFaculty.getUniversityID() + ", '"+ newFaculty.getFirstName() + " " + newFaculty.getLastName() + "', '"
+                + newFaculty.getEmail() + "', (SELECT DEPARTMENTID FROM DEPARTMENT WHERE DEPARTMENTNAME = '" + departmentName + "'), '"
+                + newFaculty.getOfficeNumber() + "', '" + newFaculty.getOfficeNumber() + "', '" + newFaculty.getPhoneNumber() + "', '"
+                + newFaculty.getRank() + "')";
+
+        // Call runDBQuery to execute the INSERT query
+        runDBQuery(sqlQuery, 'c');
+
         System.out.println("Faculty member added successfully to the " + departmentName + " department!");
     }
+
     
     public static void deleteFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Delete Faculty Member ===");
@@ -887,7 +911,7 @@ public class mainApp {
                     generateCourseReport(courses);
                     break;
                 case 4:
-                    generateDepartmentReport(departments);
+                    generateDepartmentReport();
                     break;
                 case 5:
                     generateStudentScheduleReport(students, schedules);
@@ -959,7 +983,7 @@ public class mainApp {
             return;
         }
         for (Faculty member : faculty) {
-            System.out.println("Name: " + member.getFirstName() + " " + member.getLastName());
+            System.out.println("Name: " + member.getName());
             System.out.println("Department: " + member.getDepartment().getDepartmentName());
             System.out.println("Office Location: " + member.getOfficeNumber());
             System.out.println("Email: " + member.getEmail());
@@ -1016,23 +1040,81 @@ public class mainApp {
         }
     }
 
-    // shows all members in each department
-    public static void generateDepartmentReport(ArrayList<Department> departments) {
+    public static void generateDepartmentReport() {
         System.out.println("\n=== Department Report ===");
-        for (Department department : departments) {
-            System.out.println("Department: " + department.getDepartmentName());
-            System.out.println("Faculty Members:");
-            List<Faculty> facultyList = department.getFacultyMembers(); // gets list from department cdf
-            if (facultyList.isEmpty()) { // if empty print error message 
-                System.out.println(" - No faculty members.");
-            } else {
-                for (Faculty faculty : facultyList) { // prints name of each member in specific department
-                    System.out.println(" - " + faculty.getFirstName() + " " + faculty.getLastName() + " (" + faculty.getUniversityID() + ")");
+
+        // Query to fetch all departments and their faculty
+        String query = "SELECT D.DEPARTMENTID, D.DEPARTMENTNAME, F.FACULTYID, F.FACULTYNAME, F.FACULTYEMAILADDRESS "
+                     + "FROM DEPARTMENT D "
+                     + "LEFT JOIN FACULTY F ON D.DEPARTMENTID = F.DEPARTMENTID";  // Assuming DEPARTMENTID in both tables
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Variables to hold current department being processed
+            String currentDepartment = "";
+            List<Faculty> facultyList = new ArrayList<>();  // List to store faculty for each department
+
+            // Process the result set
+            while (resultSet.next()) {
+                String departmentName = resultSet.getString("DEPARTMENTNAME");
+                String facultyName = resultSet.getString("FACULTYNAME");
+                String facultyEmail = resultSet.getString("FACULTYEMAILADDRESS");
+
+                // If department name changes, print the department header and faculty list
+                if (!departmentName.equals(currentDepartment)) {
+                    // Print previous department's faculty if it's not the first one
+                    if (!facultyList.isEmpty()) {
+                        System.out.println("Faculty Members:");
+                        for (Faculty faculty : facultyList) {
+                            System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + ")");
+                        }
+                    }
+
+                    // Print the new department header
+                    if (!departmentName.equals(currentDepartment)) {
+                        if (!facultyList.isEmpty()) {
+                            System.out.println("--------------------------");
+                        }
+                        currentDepartment = departmentName;
+                        facultyList.clear();  // Clear faculty list for the new department
+
+                        // Print department header
+                        System.out.println("Department: " + departmentName);
+                    }
+                }
+
+                // If faculty is found, create Faculty object and add to the list
+                if (facultyName != null) {
+                    Faculty faculty = new Faculty(facultyName, facultyEmail);
+                    facultyList.add(faculty);
                 }
             }
+
+            // After finishing the loop, ensure the last department's faculty is printed
+            if (!facultyList.isEmpty()) {
+                System.out.println("Faculty Members:");
+                for (Faculty faculty : facultyList) {
+                    System.out.println(" - " + faculty.getName() + " (" + faculty.getEmail() + ")");
+                }
+            }
+
             System.out.println("--------------------------");
+            System.out.println();
+
+        } catch (SQLException e) {
+            System.out.println("Error processing results: " + e.toString());
         }
     }
+
 
     // shows a schedule for specific student 
     public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules) {
@@ -1072,6 +1154,18 @@ public class mainApp {
     
     
     
+    // NEWLY ADDED PART 3 METHODS --> 
+    // WHY??:
+    //  - i wanted to be able to have data in the database be the same as data in the heap
+    //  - kinda hard to do but i think it makes the program run better - especially for modifications & deletions 
+    // how??: 
+    //  - created a method for each arrayList that was in part2
+    //  - queried the db for all occurences from the respective table
+    //  - created a new object for each record
+    //      - didnt work at first so i had to modify the constructors of the CDFs to allow an inputted ID 
+    //      - also had to check if it already existed (primarily for department) so thta there werent duplicates
+    //  - populate the arrayList tht was passed into method 
+    //  - pray that it didnt destroy everything
     
      
     public static void runDBQuery(String query, char queryType)
@@ -1148,47 +1242,143 @@ public class mainApp {
     }
     
     public static ArrayList<Course> loadCoursesFromDatabase() {
-    ArrayList<Course> courses = new ArrayList<>();
-    String query = "SELECT * FROM Course";
+        ArrayList<Course> courses = new ArrayList<>();
+        String query = "SELECT * FROM Course";
 
-    try {
-        String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
-        String user = "javauser";
-        String pass = "javapass";
-        oDS = new OracleDataSource();
-        oDS.setURL(URL);
-        jsqlConn = oDS.getConnection(user, pass);
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
 
-        PreparedStatement stmt = jsqlConn.prepareStatement(query);
-        ResultSet resultSet = stmt.executeQuery();
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
 
-        // Create and set Course objects based on query results
-        while (resultSet.next()) {
-            int courseID = resultSet.getInt("courseID");
-            String coursePrefix = resultSet.getString("coursePrefix");
-            String courseNumber = resultSet.getString("courseNumber");
-            String courseName = resultSet.getString("courseName");
-            String daysOfWeek = resultSet.getString("daysOfWeek");
-            String startTime = resultSet.getString("startTime");
-            String endTime = resultSet.getString("endTime");
-            int creditHours = resultSet.getInt("creditHours");
-            String subject = resultSet.getString("subject");
+            // create and set course objects 
+            while (resultSet.next()) {
+                int courseID = resultSet.getInt("courseID");
+                String coursePrefix = resultSet.getString("coursePrefix");
+                String courseNumber = resultSet.getString("courseNumber");
+                String courseName = resultSet.getString("courseName");
+                String daysOfWeek = resultSet.getString("daysOfWeek");
+                String startTime = resultSet.getString("startTime");
+                String endTime = resultSet.getString("endTime");
+                int creditHours = resultSet.getInt("creditHours");
+                String subject = resultSet.getString("subject");
 
-            // Assuming that Faculty object is already handled
-            Faculty faculty = new Faculty(); // Create a Faculty object as needed, or query it if required
+                Faculty faculty = new Faculty(); 
 
-            // Create a new Course object
-            Course course = new Course(courseID, coursePrefix, courseNumber, courseName, daysOfWeek, startTime, endTime, creditHours, subject, faculty);
+                Course course = new Course(courseID, coursePrefix, courseNumber, courseName, daysOfWeek, startTime, endTime, creditHours, subject, faculty);
 
-            // Add the newly created course to the ArrayList
-            courses.add(course);
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
         }
-    } catch (SQLException e) {
-        System.out.println(e.toString());
+
+        return courses;
     }
 
-    return courses;
+    public static ArrayList<Department> loadDepartmentsFromDatabase() {
+        ArrayList<Department> departments = new ArrayList<>();
+        String query = "SELECT * FROM DEPARTMENT";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // create and set department objects from results
+            while (resultSet.next()) {
+                int departmentID = resultSet.getInt("departmentID");
+                String departmentName = resultSet.getString("departmentName");
+
+                // check if the department already exists
+                boolean exists = false;
+                for (Department dept : departments) {
+                    if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                // if the department does not exist --> create and add it to the list
+                if (!exists) {
+                    Department department = new Department(departmentName);
+                    departments.add(department);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        return departments;
     }
 
+    
+    public static ArrayList<Faculty> loadFacultyFromDatabase(ArrayList<Department> departments) {
+        ArrayList<Faculty> facultyList = new ArrayList<>();
+        String query = "SELECT * FROM FACULTY";
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            PreparedStatement stmt = jsqlConn.prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Create and set Faculty objects based on query results
+            while (resultSet.next()) {
+                int facultyID = resultSet.getInt("facultyID");
+                String name = resultSet.getString("facultyName");
+                String email = resultSet.getString("facultyEmailAddress");
+                String departmentName = resultSet.getString("departmentID");
+                String officeBuilding = resultSet.getString("buildingName");
+                String officeNumber = resultSet.getString("officeNumber");
+                String phoneNumber = resultSet.getString("facultyPhoneNumber");
+                String rank = resultSet.getString("position");
+
+                // find or create the department
+                Department department = null;
+                for (Department dept : departments) {
+                    if (dept.getDepartmentName().equalsIgnoreCase(departmentName)) {
+                        department = dept;
+                        break;
+                    }
+                }
+
+                // if department is not found --> create it and add it to the departments list
+                if (department == null) {
+                    department = new Department(departmentName);
+                    departments.add(department);
+                }
+
+                // create a new Faculty object
+                Faculty faculty = new Faculty(facultyID, name, email, department, officeBuilding, officeNumber, phoneNumber, rank);
+
+                // add the faculty to the department and faculty list
+                department.addFaculty(faculty);
+                facultyList.add(faculty);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        return facultyList;
+    }
+
+    
     
 }

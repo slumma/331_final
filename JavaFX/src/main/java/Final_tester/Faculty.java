@@ -7,10 +7,12 @@ Purpose : create an application for a community college that allows a user to cr
 */
 
 public class Faculty extends Person {
-    private String officeNumber;
+    private String office;
     private Department department;  // stores department object
     private String phoneNumber;
     private String rank;
+    private String officeBuilding;
+    private String officeNumber; 
 
     public Faculty() {
         // Initialize with default values or leave them as null/empty
@@ -26,9 +28,29 @@ public class Faculty extends Person {
                    String phoneNumber, String rank) {
         super(firstName, lastName, email, ssn);  // Call the superclass constructor
         this.department = department;  // Store the full Department object
-        this.officeNumber = officeBuilding + " " + officeNumber;  // Combine office building and number
+        this.office = officeBuilding + " " + officeNumber;  // Combine office building and number
         this.phoneNumber = phoneNumber;
         this.rank = rank;
+        this.officeBuilding = officeBuilding;
+        this.officeNumber = officeNumber;
+    }
+    
+    public Faculty(int facultyID, String name, String email, Department department,
+                   String officeBuilding, String officeNumber, String phoneNumber, String rank) {
+        this.name = name;
+        this.emailAddress = email;
+        this.universityID = facultyID;
+        this.department = department;  
+        this.office = officeBuilding + " " + officeNumber;  
+        this.phoneNumber = phoneNumber;
+        this.rank = rank;
+        this.officeBuilding = officeBuilding;
+        this.officeNumber = officeNumber;
+    }
+    
+    public Faculty(String name, String email){
+        this.name = name;
+        this.emailAddress = email;
     }
 
     // getters n setters
@@ -38,6 +60,14 @@ public class Faculty extends Person {
 
     public void setOfficeNumber(String officeNumber) {
         this.officeNumber = officeNumber;
+    }
+    
+    public String getOfficeBuilding(){
+        return officeBuilding;
+    }
+    
+    public String getOffice(){
+        return office;
     }
 
     public Department getDepartment() {
