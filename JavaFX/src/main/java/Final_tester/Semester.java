@@ -10,17 +10,21 @@ public class Semester {
     private String period;  // e.g., "Fall", "Spring", "Summer"
     private int year;
     private int weekLength;
+    public int semesterID;
+    private static int nextID = 1; 
 
     public Semester() {
         this.period = "N/A";
         this.year = 0;
         this.weekLength = 0;
+        this.semesterID = nextID++;
     }
 
     public Semester(String period, int year, int weekLength) {
         this.period = period;
         this.year = year;
         this.weekLength = weekLength;
+        this.semesterID = nextID++;
     }
 
     // getters n setters
@@ -46,6 +50,10 @@ public class Semester {
 
     public void setWeekLength(int weekLength) {
         this.weekLength = weekLength;
+    }
+    
+    public int getSemesterID(){
+        return semesterID;
     }
     
     

@@ -188,10 +188,10 @@ public class mainApp {
         System.out.println("Please enter emergency contact ZIP code:");
         String eContactZIP = in.nextLine();
 
-        // Set values for the new Student object using input from the user
+        // set values for the new Student object using input from the user
         newStudent = new Student(firstName, lastName, email, ssn, gpa, homeStreet, homeCity, homeState, homeZIP, eContactName, eContactPhone, eContactStreet, eContactCity, eContactState, eContactZIP);
 
-        // Build the SQL query from the student object
+        // build the SQL query from the student object
         String sqlQuery = "INSERT INTO STUDENT (STUDENTID, STUDENTNAME, SSN, STUDENTHOMEADDRESS, STUDENTEMAILADDRESS, GPA, "
                  + "EMERGENCYCONTACTNAME, EMERGENCYCONTACTPHONE, EMERGENCYCONTACTADDRESS) VALUES ("
                  + newStudent.universityID + ", '" + newStudent.getFirstName() + " " + newStudent.getLastName() + "', '"
@@ -727,11 +727,11 @@ public class mainApp {
         }
 
         if (facultyToRemove != null) {
-            // Delete from database
+            // delete from database
             String deleteQuery = "DELETE FROM FACULTY WHERE FACULTYID = " + universityID;
-            runDBQuery(deleteQuery, 'c');  // Assuming 'c' is for executing queries that modify the database
+            runDBQuery(deleteQuery, 'c'); 
 
-            // Remove from facultyList
+            // remove from facultyList
             facultyList.remove(facultyToRemove);
             System.out.println("Faculty member removed successfully from the database.");
         } else {
@@ -743,7 +743,8 @@ public class mainApp {
     public static void editFaculty(ArrayList<Faculty> facultyList) {
         System.out.println("\n=== Edit Faculty Member ===");
 
-        viewFaculty(facultyList);
+        // Query the database to fetch faculty members
+        generateFacultyReport();  // This is your method to list faculty, make sure it pulls from DB
 
         System.out.print("Enter Faculty University ID to Edit: ");
         int universityID = in.nextInt();
@@ -762,38 +763,66 @@ public class mainApp {
             return;
         }
 
-        System.out.println("Editing Faculty Member: " + facultyToEdit.getFirstName() + " " + facultyToEdit.getLastName());
-        System.out.print("Enter New First Name (or press Enter to keep current): ");
-        String newFirstName = in.nextLine();
-        if (!newFirstName.isEmpty()) facultyToEdit.firstName = newFirstName;
+        System.out.println("Editing Faculty Member: " + facultyToEdit.getName());
 
-        System.out.print("Enter New Last Name (or press Enter to keep current): ");
-        String newLastName = in.nextLine();
-        if (!newLastName.isEmpty()) facultyToEdit.lastName = newLastName;
+        // Prompt to update fields one by one
+        System.out.print("Enter New Name (or press Enter to keep current): ");
+        String newName = in.nextLine();
+        if (!newName.isEmpty()) {
+            facultyToEdit.setName(newName);  // Assuming Faculty class has a setName method
+        }
 
         System.out.print("Enter New Email (or press Enter to keep current): ");
         String newEmail = in.nextLine();
-        if (!newEmail.isEmpty()) facultyToEdit.setEmail(newEmail);
+        if (!newEmail.isEmpty()) {
+            facultyToEdit.setEmail(newEmail);
+        }
 
         System.out.print("Enter New Phone Number (or press Enter to keep current): ");
         String newPhoneNumber = in.nextLine();
-        if (!newPhoneNumber.isEmpty()) facultyToEdit.setPhoneNumber(newPhoneNumber);
+        if (!newPhoneNumber.isEmpty()) {
+            facultyToEdit.setPhoneNumber(newPhoneNumber);
+        }
 
         System.out.print("Enter New Rank (or press Enter to keep current): ");
         String newRank = in.nextLine();
-        if (!newRank.isEmpty()) facultyToEdit.setRank(newRank);
+        if (!newRank.isEmpty()) {
+            facultyToEdit.setRank(newRank);
+        }
 
-        System.out.println("Faculty member updated successfully!");
+        // Now update the changes in the database
+        String updateQuery = "UPDATE FACULTY SET "
+                + "FACULTYNAME = '" + facultyToEdit.getName() + "', "
+                + "FACULTYEMAILADDRESS = '" + facultyToEdit.getEmail() + "', "
+                + "FACULTYPHONENUMBER = '" + facultyToEdit.getPhoneNumber() + "', "
+                + "POSITION = '" + facultyToEdit.getRank() + "' "
+                + "WHERE FACULTYID = " + facultyToEdit.getUniversityID();
+
+        try {
+            String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+            String user = "javauser";
+            String pass = "javapass";
+            oDS = new OracleDataSource();
+            oDS.setURL(URL);
+            jsqlConn = oDS.getConnection(user, pass);
+
+            // Execute the update using executeUpdate() for DML queries
+            int result = jsqlConn.createStatement().executeUpdate(updateQuery);
+
+            if (result > 0) {
+                System.out.println("Faculty member updated successfully in the database!");
+            } else {
+                System.out.println("No faculty member found with that ID in the database.");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error updating faculty member: " + e.toString());
+        }
     }
 
+
     public static void viewFaculty(ArrayList<Faculty> facultyList) {
-        System.out.println("\n=== Faculty Members ===");
-        for (Faculty faculty : facultyList) {
-            System.out.println(faculty);
-        }
-        if (facultyList.isEmpty()) {
-            System.out.println("No faculty members available.");
-        }
+        generateFacultyReport();
     }
 
     //////////////////////////////////////////
@@ -805,82 +834,134 @@ public class mainApp {
     public static Schedule enrollment(ArrayList<Student> students, ArrayList<Course> courses, ArrayList<Schedule> schedules, Semester semester) {
         // display available students
         System.out.println("Available Students:");
-        for (Student student : students) {
-            System.out.println(student.getFirstName() + " " + student.getLastName() + " - ID: " + student.getUniversityID());
-        }
-    
-        // ask for ID
+        generateStudentReport(students);
+
+        // ask for student ID
         System.out.print("\nEnter student ID to enroll: ");
         int studentID = in.nextInt();
         in.nextLine(); // Consume newline
-    
-        // find student
+
         Student student = null;
+
+        // check if the student exists in the provided list
         for (Student s : students) {
             if (s.getUniversityID() == studentID) {
                 student = s;
                 break;
             }
         }
-    
+
         if (student == null) {
             System.out.println("Student not found with ID: " + studentID);
-            return null; // Return null if student not found
+            return null;
         }
-    
-        // display courses
+
+        System.out.println("Selected Student: " + student.getName());
+
+        // display available courses
         System.out.println("\nAvailable Courses:");
-        for (Course course : courses) {
-            System.out.println("=====================");
-            System.out.println("Course ID    : " + course.getCourseID());
-            System.out.println("Course Name  : " + course.getCourseName());
-            System.out.println("Professor    : " + course.getFaculty().getFirstName() + " " + course.getFaculty().getLastName());
-            System.out.println("=====================");
-        }
-    
-        // ask for the course to enroll in
+        generateCourseReport(courses);
+
+        // ask for the course ID to enroll in
         System.out.print("\nEnter the course ID to enroll in: ");
         int courseID = in.nextInt();
         in.nextLine(); // Consume newline
-    
-        // find the selected course
+
         Course selectedCourse = null;
+
+        // chcck if the course exists in the provided list
         for (Course course : courses) {
-            if (course.getCourseID() == (courseID)) {
+            if (course.getCourseID() == courseID) {
                 selectedCourse = course;
                 break;
             }
         }
-    
+
         if (selectedCourse == null) {
             System.out.println("Course not found with ID: " + courseID);
-            return null; // return null if course not found
+            return null;
         }
-    
-        // checks if the student already has a schedule
+
+        System.out.println("Selected Course: " + selectedCourse.getCourseName());
+
+        // check if a schedule already exists for the student
         Schedule studentSchedule = null;
-        for (Schedule schedule : schedules) {
-            if (schedule.getStudent().equals(student)) {
-                studentSchedule = schedule;
-                break;
+        try {
+
+            int enrollmentID = -1;
+            String query = "SELECT enrollmentID FROM ENROLLMENT WHERE studentID = ? AND semesterID = ?";
+            PreparedStatement ps = jsqlConn.prepareStatement(query);
+            ps.setInt(1, studentID);
+            ps.setInt(2, semester.getSemesterID());
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                // if enrollment already exists, get the enrollmentID
+                enrollmentID = rs.getInt("enrollmentID");
+            } else {
+                // manually generate enrollmentID by getting the next available ID
+                // creates the next unique EnrollmentID by taking the highest one and adding one to it
+                query = "SELECT COALESCE(MAX(enrollmentID), 0) + 1 AS newEnrollmentID FROM ENROLLMENT";
+                ps = jsqlConn.prepareStatement(query);
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    enrollmentID = rs.getInt("newEnrollmentID");
+                }
+
+                String insertEnrollmentQuery = "INSERT INTO ENROLLMENT (enrollmentID, studentID, semesterID) VALUES (?, ?, ?)";
+                ps = jsqlConn.prepareStatement(insertEnrollmentQuery);
+                ps.setInt(1, enrollmentID);
+                ps.setInt(2, studentID);
+                ps.setInt(3, semester.getSemesterID());
+                ps.executeUpdate();
             }
+
+            // create the Enrollment object
+            Enrollment enrollment = new Enrollment(enrollmentID, student, semester);
+
+            // generate a unique courseEnrollmentID same as above
+            query = "SELECT COALESCE(MAX(courseEnrollmentID), 0) + 1 AS newCourseEnrollmentID FROM CourseEnrollment";
+            ps = jsqlConn.prepareStatement(query);
+            rs = ps.executeQuery();
+            int courseEnrollmentID = 0;
+            if (rs.next()) {
+                courseEnrollmentID = rs.getInt("newCourseEnrollmentID");
+            }
+
+            // use the generated courseEnrollmentID to add the course
+            String insertCourseEnrollmentQuery = "INSERT INTO CourseEnrollment (courseEnrollmentID, enrollmentID, courseID) VALUES (?, ?, ?)";
+            ps = jsqlConn.prepareStatement(insertCourseEnrollmentQuery);
+            ps.setInt(1, courseEnrollmentID); // Use the generated courseEnrollmentID
+            ps.setInt(2, enrollmentID); // Use the enrollmentID
+            ps.setInt(3, selectedCourse.getCourseID()); // Use the courseID
+            ps.executeUpdate();
+
+            // create and return the Schedule
+            studentSchedule = new Schedule(enrollment, new ArrayList<>());
+            studentSchedule.addCourse(selectedCourse);
+
+            jsqlConn.commit();
+        } catch (SQLException e) {
+            System.out.println("Error during enrollment: " + e.toString());
+            try {
+                // LITERALLY MY SAVING GRACE, reverts the changes to the databses previous state 
+                jsqlConn.rollback(); 
+            } catch (SQLException rollbackEx) {
+                System.out.println("Error during rollback: " + rollbackEx.toString());
+            }
+            return null;
         }
-    
-        // if no schedule exists, create a new one
-        if (studentSchedule == null) {
-            studentSchedule = new Schedule(student, semester, new ArrayList<>());
-            schedules.add(studentSchedule); // Add the new schedule to the list
-        }
-    
-        // add the selected course to the student's schedule
-        studentSchedule.addCourse(selectedCourse);
-    
-        // confirmation message
-        System.out.println(student.getFirstName() + " " + student.getLastName() + " successfully enrolled in " + selectedCourse.getCourseName() + "\n");
-    
-        // return the updated schedule
+
+        System.out.println(student.getName() + " successfully enrolled in " + selectedCourse.getCourseName() + "\n");
+
         return studentSchedule;
     }
+
+
+
+
+
+
     
     
 
@@ -1008,7 +1089,7 @@ public class mainApp {
                 return;
             }
 
-            // Process the result set and display faculty details
+            // process the result set and display faculty details
             do {
                 int facultyID = resultSet.getInt("FACULTYID");
                 String facultyName = resultSet.getString("FACULTYNAME");
@@ -1016,7 +1097,7 @@ public class mainApp {
                 String departmentName = resultSet.getString("DEPARTMENTNAME");
                 String officeNumber = resultSet.getString("OFFICENUMBER");
 
-                // Print the faculty details
+                // print the faculty details
                 System.out.println("Name: " + facultyName + " (" + facultyID + ")" );
                 System.out.println("Department: " + departmentName);
                 System.out.println("Office Location: " + officeNumber);
@@ -1040,10 +1121,9 @@ public class mainApp {
             return;
         }
 
-        // Query to fetch all courses
+        // query to fetch all courses
         String query = "SELECT * FROM COURSE";
 
-        // Executes the query
         runDBQuery(query, 'r');
 
         // Same logic as the previous method, but catered to returning course data
@@ -1104,19 +1184,19 @@ public class mainApp {
             PreparedStatement stmt = jsqlConn.prepareStatement(query);
             ResultSet resultSet = stmt.executeQuery();
 
-            // Variables to hold current department being processed
+            // hold current department being processed
             String currentDepartment = "";
-            List<Faculty> facultyList = new ArrayList<>();  // List to store faculty for each department
+            List<Faculty> facultyList = new ArrayList<>();
 
-            // Process the result set
+            // process the result set
             while (resultSet.next()) {
                 String departmentName = resultSet.getString("DEPARTMENTNAME");
                 String facultyName = resultSet.getString("FACULTYNAME");
                 String facultyEmail = resultSet.getString("FACULTYEMAILADDRESS");
 
-                // If department name changes, print the department header and faculty list
+                // if department name changes, print the department header and faculty list
                 if (!departmentName.equals(currentDepartment)) {
-                    // Print previous department's faculty if it's not the first one
+                    // print previous department's faculty if it's not the first one
                     if (!facultyList.isEmpty()) {
                         System.out.println("Faculty Members:");
                         for (Faculty faculty : facultyList) {
@@ -1124,20 +1204,20 @@ public class mainApp {
                         }
                     }
 
-                    // Print the new department header
+                    // print the new department header
                     if (!departmentName.equals(currentDepartment)) {
                         if (!facultyList.isEmpty()) {
                             System.out.println("--------------------------");
                         }
                         currentDepartment = departmentName;
-                        facultyList.clear();  // Clear faculty list for the new department
+                        facultyList.clear();  // *** clear faculty list for the new department, this was the only solution to the issue i was facing
 
                         // Print department header
                         System.out.println("Department: " + departmentName);
                     }
                 }
 
-                // If faculty is found, create Faculty object and add to the list
+                // if faculty is found, create Faculty object and add to the list
                 if (facultyName != null) {
                     Faculty faculty = new Faculty(facultyName, facultyEmail);
                     facultyList.add(faculty);
@@ -1161,39 +1241,73 @@ public class mainApp {
 
 
     // shows a schedule for specific student 
-    public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules) {
+    public static void generateStudentScheduleReport(ArrayList<Student> students, ArrayList<Schedule> schedules){
         Scanner in = new Scanner(System.in);
 
-        displayStudentNamesAndIDs(students);
+        generateStudentReport(students);
     
         // same logic from previous methods 
         System.out.print("\nEnter the University ID of the student: ");
         int studentID = in.nextInt();
         in.nextLine(); // Consume newline
-    
-        Student selectedStudent = null;
+        
+        Student targetStudent = null;
         for (Student student : students) {
             if (student.getUniversityID() == studentID) {
-                selectedStudent = student;
+                targetStudent = student;
                 break;
             }
         }
     
-        if (selectedStudent == null) {
-            System.out.println("Student with ID " + studentID + " not found.");
-            return;
-        }
-    
-        // Find the student's schedule
-        for (Schedule schedule : schedules) {
-            if (schedule.getStudent().equals(selectedStudent)) {
-                System.out.println("\n=== Schedule Report ===");
-                System.out.println(schedule);
-                return;
+        String query = "SELECT \n" +
+                        "    s.studentName,\n" +
+                        "    c.courseName,\n" +
+                        "    c.coursePrefix,\n" +
+                        "    c.courseNumber,\n" +
+                        "    c.daysOfWeek,\n" +
+                        "    c.startTime,\n" +
+                        "    c.endTime,\n" +
+                        "    se.period,\n" +
+                        "    se.year\n" +
+                        "FROM \n" +
+                        "    Student s\n" +
+                        "JOIN \n" +
+                        "    Enrollment e ON s.studentID = e.studentID\n" +
+                        "JOIN \n" +
+                        "    CourseEnrollment ce ON e.enrollmentID = ce.enrollmentID\n" +
+                        "JOIN \n" +
+                        "    Course c ON ce.courseID = c.courseID\n" +
+                        "JOIN \n" +
+                        "    Schedule sc ON c.courseID = sc.courseID\n" +
+                        "JOIN \n" +
+                        "    Semester se ON sc.semesterID = se.semesterID\n" +
+                        "WHERE \n" +
+                        "    s.studentID = " + studentID;
+        runDBQuery(query, 'r'); 
+        ResultSet rs = jsqlResults;
+        try {
+            if (rs.next()) {
+                System.out.println(targetStudent.getName() + "'s Schedule:");
+                
+                do {
+                    System.out.println("----------");
+                    System.out.println("Course Name: " + rs.getString("courseName"));
+                    System.out.println("Course Prefix: " + rs.getString("coursePrefix"));
+                    System.out.println("Course Number: " + rs.getString("courseNumber"));
+                    System.out.println("Days of Week: " + rs.getString("daysOfWeek"));
+                    System.out.println("Start Time: " + rs.getString("startTime"));
+                    System.out.println("End Time: " + rs.getString("endTime"));
+                    System.out.println("Semester Period: " + rs.getString("period"));
+                    System.out.println("Semester Year: " + rs.getInt("year"));
+                    System.out.println("----------");
+                } while (rs.next());
+            } else {
+                System.out.println("Student with ID " + studentID + " not found.");
             }
-        }
-    
-        System.out.println("No schedule found for student " + selectedStudent.getFirstName() + " " + selectedStudent.getLastName() + ".");
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }            
+
     }
     
     
@@ -1201,7 +1315,7 @@ public class mainApp {
     // NEWLY ADDED PART 3 METHODS --> 
     // WHY??:
     //  - i wanted to be able to have data in the database be the same as data in the heap
-    //  - kinda hard to do but i think it makes the program run better - especially for modifications & deletions 
+    //  - kinda hard to do but i think it makes the program run better - especially for modifications & deletions and it would allow it to be integrated with a larger db
     // how??: 
     //  - created a method for each arrayList that was in part2
     //  - queried the db for all occurences from the respective table

@@ -81,6 +81,17 @@ public class Student extends Person {
         this.eAddress = emergencyContactAddress;
         this.SSN = ssn;
     }
+    
+    public Student (int id, String fname, String lname){
+        this.universityID = id;
+        this.firstName = fname;
+        this.lastName = lname;
+    } 
+    
+    public Student (int id, String name){
+        this.universityID = id;
+        this.name = name;
+    } 
 
     
     // setter
