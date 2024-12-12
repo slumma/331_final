@@ -12,6 +12,7 @@ public class Schedule {
     private Student student;
     private Semester semester;
     private ArrayList<Course> courses;
+    private Enrollment enrollment; 
     private int studentID;
 
     public Schedule() {
@@ -20,15 +21,38 @@ public class Schedule {
         this.courses = new ArrayList<>();
         this.studentID = 0;
     }
-
-    public Schedule(Student student, Semester semester, ArrayList<Course> courses) {
+    
+     public Schedule(Student student, Semester semester, ArrayList<Course> courses) {
         this.student = student;
         this.semester = semester;
         this.courses = courses;
         this.studentID = student.getUniversityID();
     }
 
+
+    public Schedule(Student student, Semester semester, ArrayList<Course> courses, Enrollment enrollment) {
+        this.student = student;
+        this.semester = semester;
+        this.courses = courses;
+        this.studentID = student.getUniversityID();
+        this.enrollment = enrollment;
+    }
+
+    public Schedule(Enrollment enrollment, ArrayList<Course> courses) {
+        this.enrollment = enrollment;
+        this.courses = courses;
+    }
+
     // Getters n Setters
+    public int getEnrollmentID() {
+        return enrollment.getEnrollmentID();
+    }
+    
+    public Enrollment getEnrollment(){
+        return enrollment;
+    }
+
+    
     public int getStudentID(){
         return studentID;
     }

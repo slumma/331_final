@@ -12,15 +12,26 @@ import java.util.ArrayList;
 public class Enrollment {
     private Semester semester;
     private ArrayList<Student> students;
+    public int enrollmentID;
+    public static int nextID = 1; 
 
     public Enrollment(Semester semester, ArrayList<Student> students) {
         this.semester = semester;
         this.students = students;
+        this.enrollmentID = nextID++;
     }
 
     public Enrollment() {
         this.semester = new Semester(); 
         this.students = new ArrayList<>();
+        this.enrollmentID = nextID++;
+    }
+    
+    public Enrollment(int enrollmentID, Student student, Semester semester) {
+        this.enrollmentID = enrollmentID;
+        this.semester = semester;
+        this.students = new ArrayList<>();
+        this.students.add(student);  // Add the student to the enrollment
     }
 
     // method to add a student to the enrollment
@@ -44,6 +55,11 @@ public class Enrollment {
             System.out.println("Error: Student " + student.getFirstName() + " " + student.getLastName() + " not found.");
         }
     }
+    
+    public int getEnrollmentID() {
+        return enrollmentID;
+    }
+
 
     // enrollment report
     public String toString() {
